@@ -1,0 +1,52 @@
+org: karstene
+app: shortrLink
+service: api
+
+variablesResolutionMode: 20210326
+
+plugins:
+  - serverless-prune-plugin
+  - serverless-python-requirements
+
+package:
+  patterns:
+    - '!node_modules/**'
+    - '!tests/**'
+
+custom:
+  prune:
+    automatic: true
+    number: 5
+
+provider:
+  name: aws
+  lambdaHashingVersion: '20201221'
+  profile: AudienceServAWS
+  runtime: python3.8
+  stage: ${opt:stage, 'dev'}
+  region: eu-west-1
+  tracing:
+    apiGateway: true
+    lambda: true
+  logs:
+    httpApi: true
+  environment:
+    DYNAMODB_TABLE: ${ssm:/linkShortener/${sls:stage}/dynamodb_table_name}
+    STAGE: ${sls:stage)
+    BASE_URL: 'https://vui.app'
+
+functions:
+  createShortenedLink:
+    handler: src/handlers/create_link.handler
+    events:
+      - httpApi:
+          method: POST
+          cors: true
+          path: '/shortenedLinks'
+    redirect:
+      handler: src/handlers/redirect.handler
+      events:
+        - httpApi:
+            method: GET
+            cors: true
+            path: '/r/{linkId}'
