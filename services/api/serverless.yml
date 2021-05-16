@@ -1,12 +1,13 @@
 org: karstene
-app: shortrLink
-service: api
+app: shortrlink
+service: shortrlink-api
 
 variablesResolutionMode: 20210326
 
 plugins:
   - serverless-prune-plugin
   - serverless-python-requirements
+  - serverless-domain-manager
 
 package:
   patterns:
@@ -17,23 +18,48 @@ custom:
   prune:
     automatic: true
     number: 5
+  customDomain:
+    domainName: ${self:custom.domainName.${sls:stage}}
+    certificateName: '*.shortr.link'
+    createRoute53Record: true
+    endpointType: 'regional'
+    apiType: 'http'
+    certificateArn: arn:aws:acm:eu-west-1:348342725339:certificate/628243fc-bac9-42e1-bc37-9e36348431eb
+  domainName:
+    prod: api.shortr.link
+    dev: api-dev.shortr.link
 
 provider:
   name: aws
   lambdaHashingVersion: '20201221'
-  profile: AudienceServAWS
+  profile: privateGmail
   runtime: python3.8
   stage: ${opt:stage, 'dev'}
   region: eu-west-1
+  httpApi:
+    cors: true
   tracing:
     apiGateway: true
     lambda: true
   logs:
     httpApi: true
   environment:
-    DYNAMODB_TABLE: ${ssm:/linkShortener/${sls:stage}/dynamodb_table_name}
-    STAGE: ${sls:stage)
-    BASE_URL: 'https://vui.app'
+    DYNAMODB_TABLE: '${ssm:/shortrLink/${sls:stage}/dynamodb_table_name}'
+    STAGE: '${sls:stage}'
+    BASE_DOMAIN: 'api.shortr.link'
+    REGION: '${self:provider.region}'
+  iam:
+    role:
+      statements:
+        - Effect: "Allow"
+          Action:
+            - "dynamodb:Query"
+            - "dynamodb:GetItem"
+            - "dynamodb:GetRecords"
+            - "dynamodb:PutItem"
+            - "dynamodb:UpdateItem"
+            - "dynamodb:DescribeTable"
+          Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${ssm:/shortrLink/${sls:stage}/dynamodb_table_name}"
 
 functions:
   createShortenedLink:
@@ -41,12 +67,10 @@ functions:
     events:
       - httpApi:
           method: POST
-          cors: true
           path: '/shortenedLinks'
-    redirect:
-      handler: src/handlers/redirect.handler
-      events:
-        - httpApi:
-            method: GET
-            cors: true
-            path: '/r/{linkId}'
+  redirect:
+    handler: src/handlers/redirect.handler
+    events:
+      - httpApi:
+          method: GET
+          path: '/r/{linkId}'

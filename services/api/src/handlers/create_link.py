@@ -47,7 +47,7 @@ def handler(event, context):
             },
             'body': json.dumps({
                 'id': link.id,
-                'shortUrl': os.environ['BASE_URL'] + f'/r/{link.id}',
+                'shortUrl': 'https://' + os.environ['BASE_DOMAIN'] + f'/r/{link.id}',
                 'url': link.url
             })
         }
