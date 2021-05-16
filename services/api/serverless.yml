@@ -21,11 +21,11 @@ custom:
     number: 5
   customDomain:
     domainName: '${self:custom.domainName.${sls:stage}}'
-    certificateName: '*.shortr.link'
+    certificateName: '*.shortrlink.com'
     createRoute53Record: true
     endpointType: 'regional'
     apiType: 'http'
-    certificateArn: arn:aws:acm:eu-west-1:348342725339:certificate/628243fc-bac9-42e1-bc37-9e36348431eb
+#    certificateArn: arn:aws:acm:eu-west-1:348342725339:certificate/628243fc-bac9-42e1-bc37-9e36348431eb
   domainName:
     prod: api.shortrlink.com
     dev: api-dev.shortrlink.com

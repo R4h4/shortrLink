@@ -1,6 +1,6 @@
 org: karstene
 app: shortrlink
-service: shortrlink-api
+service: shortrlink-redirect
 
 frameworkVersion: '2'
 variablesResolutionMode: 20210326
@@ -25,10 +25,9 @@ custom:
     createRoute53Record: true
     endpointType: 'regional'
     apiType: 'http'
-    certificateArn: arn:aws:acm:eu-west-1:348342725339:certificate/628243fc-bac9-42e1-bc37-9e36348431eb
   domainName:
-    prod: shortr.link
-    dev: dev.shortr.link
+    prod: 'shortr.link'
+    dev: 'dev.shortr.link'
 
 provider:
   name: aws
@@ -44,18 +43,18 @@ provider:
     lambda: true
   logs:
     httpApi: true
-  environment:
-    DYNAMODB_TABLE: '${ssm:/shortrLink/${sls:stage}/dynamodb_table_name}'
-    STAGE: '${sls:stage}'
-    BASE_DOMAIN: '${self:custom.domainName.${sls:stage}}'
-    REGION: '${self:provider.region}'
-  iam:
-    role:
-      statements:
-        - Effect: "Allow"
-          Action:
-            - "dynamodb:GetItem"
-          Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${ssm:/shortrLink/${sls:stage}/dynamodb_table_name}"
+#  environment:
+#    DYNAMODB_TABLE: '${ssm:/shortrLink/${sls:stage}/dynamodb_table_name}'
+#    STAGE: '${sls:stage}'
+#    BASE_DOMAIN: '${self:custom.domainName.${sls:stage}}'
+#    REGION: '${self:provider.region}'
+#  iam:
+#    role:
+#      statements:
+#        - Effect: "Allow"
+#          Action:
+#            - "dynamodb:GetItem"
+#          Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${ssm:/shortrLink/${sls:stage}/dynamodb_table_name}"
 
 functions:
   redirect:
@@ -63,4 +62,4 @@ functions:
     events:
       - httpApi:
           method: GET
-          path: '/r/{linkId}'
+          path: '/{linkId}'
