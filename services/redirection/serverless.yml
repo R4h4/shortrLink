@@ -27,8 +27,8 @@ custom:
     apiType: 'http'
     certificateArn: arn:aws:acm:eu-west-1:348342725339:certificate/628243fc-bac9-42e1-bc37-9e36348431eb
   domainName:
-    prod: api.shortrlink.com
-    dev: api-dev.shortrlink.com
+    prod: shortr.link
+    dev: dev.shortr.link
 
 provider:
   name: aws
@@ -54,21 +54,10 @@ provider:
       statements:
         - Effect: "Allow"
           Action:
-            - "dynamodb:Query"
             - "dynamodb:GetItem"
-            - "dynamodb:GetRecords"
-            - "dynamodb:PutItem"
-            - "dynamodb:UpdateItem"
-            - "dynamodb:DescribeTable"
           Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${ssm:/shortrLink/${sls:stage}/dynamodb_table_name}"
 
 functions:
-  createShortenedLink:
-    handler: src/handlers/create_link.handler
-    events:
-      - httpApi:
-          method: POST
-          path: '/api/shortenedLinks'
   redirect:
     handler: src/handlers/redirect.handler
     events:
