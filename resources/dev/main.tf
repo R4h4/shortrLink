@@ -1,3 +1,8 @@
+locals {
+  stage = "dev"
+  app = "shortrLink"
+}
+
 terraform {
   required_providers {
     aws = {
@@ -10,6 +15,7 @@ terraform {
     bucket = "ke-terraform-backends"
     key = "state/startdust/sender_service.dev.tfstate"
     region = "eu-west-1"
+    profile = "privateGmail"
   }
 }
 
@@ -19,29 +25,34 @@ provider "aws" {
   default_tags {
     tags = {
       terraform = "true"
-      project = "linkShortener",
+      project = local.app,
       service = "main"
-      stage = var.stage
+      stage = local.stage
     }
   }
 }
 
 module "dynamodb_table" {
-  source   = "terraform-aws-modules/dynamodb-table/aws"
+  source   = "../modules/dynamodb"
 
-  name     = format("linkShortener_%s", var.stage)
-  hash_key = "PK"
-  range_key = "SK"
-  stream_enabled = true
+  app_name = local.app
+  stage = local.stage
+}
 
-  attributes = [
-    {
-      name = "PK"
-      type = "S"
-    },
-    {
-      name = "SK"
-      type = "S"
-    }
-  ]
+resource "aws_ssm_parameter" "table_arn" {
+  name = format("/%s/%s/dynamodb_table_arn", local.app, local.stage)
+  type = "String"
+  value = module.dynamodb_table.table_arn
+}
+
+resource "aws_ssm_parameter" "table_name" {
+  name = format("/%s/%s/dynamodb_table_name", local.app,local.stage)
+  type = "String"
+  value = module.dynamodb_table.table_name
+}
+
+resource "aws_ssm_parameter" "dynamodb_stream_arn" {
+  name = format("/%s/%s/dynamodb_stream_arn", local.app,local.stage)
+  type = "String"
+  value = module.dynamodb_table.stream_arn
 }
