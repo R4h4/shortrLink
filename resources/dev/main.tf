@@ -39,6 +39,10 @@ module "dynamodb_table" {
   stage = local.stage
 }
 
+resource "aws_cloudwatch_event_bus" "main" {
+  name = format("%s_%s_bus", local.app, local.stage)
+}
+
 resource "aws_ssm_parameter" "table_arn" {
   name = format("/%s/%s/dynamodb_table_arn", local.app, local.stage)
   type = "String"
@@ -55,4 +59,10 @@ resource "aws_ssm_parameter" "dynamodb_stream_arn" {
   name = format("/%s/%s/dynamodb_stream_arn", local.app,local.stage)
   type = "String"
   value = module.dynamodb_table.stream_arn
+}
+
+resource "aws_ssm_parameter" "eventbus_name" {
+  name = format("/%s/%s/eventbus_name", local.app,local.stage)
+  type = "String"
+  value = aws_cloudwatch_event_bus.main.name
 }
