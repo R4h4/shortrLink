@@ -76,6 +76,6 @@ functions:
           maximumRetryAttempts: 1
           pattern:
             source:
-              - 'aws.lambda'
+              - 'shortrLinks.lambda'
             detail-type:
               - 'shortrLink user redirect'
