@@ -32,6 +32,8 @@ custom:
 provider:
   name: aws
   lambdaHashingVersion: '20201221'
+#  eventBridge:
+#    useCloudFormation: true
   profile: privateGmail
   runtime: python3.8
   stage: ${opt:stage, 'dev'}
@@ -48,6 +50,8 @@ provider:
     STAGE: '${sls:stage}'
     BASE_DOMAIN: 'shortr.link'
     REGION: '${self:provider.region}'
+    TIMESTREAM_DB: '${ssm:/shortrLink/${sls:stage}/timestream_db_name}'
+    TIMESTREAM_TABLE_NAME: '${ssm:/shortrLink/${sls:stage}/timestream_redirects_table}'
   iam:
     role:
       statements:
@@ -60,6 +64,17 @@ provider:
             - "dynamodb:UpdateItem"
             - "dynamodb:DescribeTable"
           Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${ssm:/shortrLink/${sls:stage}/dynamodb_table_name}"
+        - Effect: "Allow"
+          Action:
+            - "timestream:*"
+            - "timestream:DescribeEndpoints"
+            - "timestream:Select"
+            - "timestream:CancelQuery"
+            - "timestream:DescribeTable"
+            - "timestream:WriteRecords"
+          Resource:
+            - 'arn:aws:timestream:${self:provider.region}:*:database/${ssm:/shortrLink/${sls:stage}/timestream_db_name}'
+            - 'arn:aws:timestream:${self:provider.region}:*:database/${ssm:/shortrLink/${sls:stage}/timestream_db_name}/*'
 
 functions:
   createShortenedLink:
@@ -70,6 +85,17 @@ functions:
           path: '/short-links'
   indexRedirectDynamoDb:
     handler: src/handlers/index_redirect_dynamodb.handler
+    events:
+      - eventBridge:
+          eventBus: 'arn:aws:events:${self:provider.region}:*:event-bus/${ssm:/shortrLink/${sls:stage}/eventbus_name}'
+          maximumRetryAttempts: 1
+          pattern:
+            source:
+              - 'shortrLinks.lambda'
+            detail-type:
+              - 'shortrLink user redirect'
+  indexRedirectTimeStream:
+    handler: src/handlers/index_redirect_timestream.handler
     events:
       - eventBridge:
           eventBus: 'arn:aws:events:${self:provider.region}:*:event-bus/${ssm:/shortrLink/${sls:stage}/eventbus_name}'
