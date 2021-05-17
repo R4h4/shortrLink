@@ -41,20 +41,28 @@ provider:
   tracing:
     apiGateway: true
     lambda: true
-  logs:
-    httpApi: true
-#  environment:
-#    DYNAMODB_TABLE: '${ssm:/shortrLink/${sls:stage}/dynamodb_table_name}'
-#    STAGE: '${sls:stage}'
-#    BASE_DOMAIN: '${self:custom.domainName.${sls:stage}}'
-#    REGION: '${self:provider.region}'
-#  iam:
-#    role:
-#      statements:
-#        - Effect: "Allow"
-#          Action:
-#            - "dynamodb:GetItem"
-#          Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${ssm:/shortrLink/${sls:stage}/dynamodb_table_name}"
+#  logs:
+#    httpApi: true
+  environment:
+    DYNAMODB_TABLE: '${ssm:/shortrLink/${sls:stage}/dynamodb_table_name}'
+    STAGE: '${sls:stage}'
+    BASE_DOMAIN: '${self:custom.domainName.${sls:stage}}'
+    REGION: '${self:provider.region}'
+    EVENT_BUS_NAME: '${ssm:/shortrLink/${sls:stage}/eventbus_name}'
+  iam:
+    role:
+      statements:
+        - Effect: "Allow"
+          Action:
+            - "dynamodb:GetItem"
+            - "dynamodb:DescribeTable"
+          Resource:
+          - "${ssm:/shortrLink/${sls:stage}/dynamodb_table_arn}"
+        - Effect: "Allow"
+          Action:
+            - "events:PutEvents"
+          Resource:
+            - 'arn:aws:events:${self:provider.region}:*:event-bus/${ssm:/shortrLink/${sls:stage}/eventbus_name}'
 
 functions:
   redirect:
