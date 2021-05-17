@@ -5,10 +5,16 @@ import datetime as dt
 
 from pynamodb.exceptions import DoesNotExist
 import boto3
+from aws_xray_sdk.core import xray_recorder
+from aws_xray_sdk.core import patch_all
+
 
 from src.models import ShortenedLink
 from src.exceptions import ExternalError, InternalError
 
+
+# apply the XRay handler to all clients.
+patch_all()
 
 client = boto3.client('events')
 
@@ -33,29 +39,31 @@ def handler(event, context):
         link = ShortenedLink.get(link_id, 'LINK')
 
         # Make known that someone actually used the service
-        res = client.put_events(
-            Entries=[
-                {
-                    'Time': dt.datetime.now(),
-                    'Source': 'aws.lambda',
-                    'Resources': [
-                        context.invoked_function_arn
-                    ],
-                    'DetailType': 'shortrLink user redirect',
-                    'Detail': json.dumps({
-                        'link_id': link_id,
-                        'ip': event['requestContext']['sourceIp'],
-                        'user_agent': event['requestContext']['userAgent'],
-                        'origin': event['headers'].get('Origin', ''),
-                        'headers': event['headers']
-                    }),
-                    'EventBusName': os.environ['EVENT_BUS_NAME'],
-                    'TraceHeader': event['headers']['x-amzn-trace-id']
-                },
-            ]
-        )
-        if res['FailedEntryCount']:
-            logger.exception(f'Failed publishing click/redirect event.')
+        try:
+            res = client.put_events(
+                Entries=[
+                    {
+                        'Time': dt.datetime.now(),
+                        'Source': 'shortrLinks.lambda',
+                        'Resources': [
+                            context.invoked_function_arn
+                        ],
+                        'DetailType': 'shortrLink user redirect',
+                        'Detail': json.dumps({
+                            'link_id': link_id,
+                            'ip': event['requestContext']['http']['sourceIp'],
+                            'user_agent': event['requestContext']['http']['userAgent'],
+                            'origin': event['headers'].get('Origin', ''),
+                            'headers': event['headers']
+                        }),
+                        'EventBusName': os.environ['EVENT_BUS_NAME']
+                    },
+                ]
+            )
+            if res.get('FailedEntryCount'):
+                logger.exception(f'Failed publishing click/redirect event. result: {res}')
+        except Exception as e:
+            logger.exception(f'Error putting event: {str(e)}')
 
         return {
             'statusCode': 302,
@@ -88,6 +96,7 @@ def handler(event, context):
             })
         }
     except Exception as e:
+        raise
         return {
             'statusCode': 500,
             'headers': {
