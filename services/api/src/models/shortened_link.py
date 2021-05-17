@@ -1,7 +1,7 @@
 import os
 from datetime import datetime
 
-from pynamodb.attributes import UnicodeAttribute, UTCDateTimeAttribute
+from pynamodb.attributes import UnicodeAttribute, UTCDateTimeAttribute, NumberAttribute
 from pynamodb.models import Model
 
 
@@ -24,6 +24,8 @@ class ShortenedLink(Model):
     id = UnicodeAttribute(null=False)
     url = UnicodeAttribute(null=False)
     user = UnicodeAttribute(null=True)
+
+    clicks = NumberAttribute(null=False, default_for_new=0)
 
     createdAt = UTCDateTimeAttribute(null=False, default=datetime.now())
     updatedAt = UTCDateTimeAttribute(null=False)

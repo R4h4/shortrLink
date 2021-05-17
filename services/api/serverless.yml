@@ -25,7 +25,6 @@ custom:
     createRoute53Record: true
     endpointType: 'regional'
     apiType: 'http'
-#    certificateArn: arn:aws:acm:eu-west-1:348342725339:certificate/628243fc-bac9-42e1-bc37-9e36348431eb
   domainName:
     prod: api.shortrlink.com
     dev: api-dev.shortrlink.com
@@ -47,7 +46,7 @@ provider:
   environment:
     DYNAMODB_TABLE: '${ssm:/shortrLink/${sls:stage}/dynamodb_table_name}'
     STAGE: '${sls:stage}'
-    BASE_DOMAIN: '${self:custom.domainName.${sls:stage}}'
+    BASE_DOMAIN: 'shortr.link'
     REGION: '${self:provider.region}'
   iam:
     role:
@@ -68,10 +67,15 @@ functions:
     events:
       - httpApi:
           method: POST
-          path: '/api/shortenedLinks'
-  redirect:
-    handler: src/handlers/redirect.handler
+          path: '/short-links'
+  indexRedirectDynamoDb:
+    handler: src/handlers/index_redirect_dynamodb.handler
     events:
-      - httpApi:
-          method: GET
-          path: '/r/{linkId}'
+      - eventBridge:
+          eventBus: 'arn:aws:events:${self:provider.region}:*:event-bus/${ssm:/shortrLink/${sls:stage}/eventbus_name}'
+          maximumRetryAttempts: 1
+          pattern:
+            source:
+              - 'aws.lambda'
+            detail-type:
+              - 'shortrLink user redirect'

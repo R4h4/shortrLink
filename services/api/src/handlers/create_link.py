@@ -35,6 +35,7 @@ def handler(event, context):
                 id=shortid.generate(),
                 url=body['url']
             )
+            link.save()
         except KeyError as e:
             raise ExternalError(f'Invalid input body/missing fields: {e}')
 
@@ -47,7 +48,7 @@ def handler(event, context):
             },
             'body': json.dumps({
                 'id': link.id,
-                'shortUrl': 'https://' + os.environ['BASE_DOMAIN'] + f'/r/{link.id}',
+                'shortUrl': 'https://' + os.environ['BASE_DOMAIN'] + f'/{link.id}',
                 'url': link.url
             })
         }
