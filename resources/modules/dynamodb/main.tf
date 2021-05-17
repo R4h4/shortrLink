@@ -12,7 +12,7 @@ resource "aws_dynamodb_table" "main_table" {
   read_capacity  = local.read_capacity
   write_capacity = local.write_capacity
 
-  stream_enabled = true
+  stream_enabled = var.stream_enabled
   stream_view_type = "KEYS_ONLY"
 
   attribute {
