@@ -45,9 +45,9 @@ def handler(event, context):
                         'DimensionValueType': 'VARCHAR'
                     },
                 ],
-                # 'MeasureName': 'string',
-                # 'MeasureValue': 'string',
-                # 'MeasureValueType': 'DOUBLE' | 'BIGINT' | 'VARCHAR' | 'BOOLEAN',
+                'MeasureName': 'redirected',
+                'MeasureValue': 'True',
+                'MeasureValueType': 'BOOLEAN',
                 'Time': str(int(dateutil.parser.parse(event['time']).timestamp())),
                 'TimeUnit': 'SECONDS'
             },

@@ -66,8 +66,6 @@ provider:
           Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${ssm:/shortrLink/${sls:stage}/dynamodb_table_name}"
         - Effect: "Allow"
           Action:
-            - "timestream:*"
-            - "timestream:DescribeEndpoints"
             - "timestream:Select"
             - "timestream:CancelQuery"
             - "timestream:DescribeTable"
@@ -75,6 +73,11 @@ provider:
           Resource:
             - 'arn:aws:timestream:${self:provider.region}:*:database/${ssm:/shortrLink/${sls:stage}/timestream_db_name}'
             - 'arn:aws:timestream:${self:provider.region}:*:database/${ssm:/shortrLink/${sls:stage}/timestream_db_name}/*'
+        - Effect: "Allow"
+          Action:
+            - "timestream:DescribeEndpoints"
+          Resource:
+            - '*'
 
 functions:
   createShortenedLink:

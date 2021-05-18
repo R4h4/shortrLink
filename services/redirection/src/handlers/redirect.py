@@ -96,7 +96,6 @@ def handler(event, context):
             })
         }
     except Exception as e:
-        raise
         return {
             'statusCode': 500,
             'headers': {
