@@ -1,0 +1,29 @@
+org: karstene
+app: shortrlink
+service: shortrlink-app
+
+frameworkVersion: '2'
+variablesResolutionMode: 20210326
+
+
+#plugins:
+#  - serverless-s3-sync
+
+patterns:
+  - '!src/**'
+  - '!node_modules/**'
+
+#custom:
+#  s3Sync:
+#    # A simple configuration for copying static assets
+#    - bucketName: '${ssm:/shortrLink/${sls:stage}/app_bucket_name}'
+#      localDir: dist # required
+
+
+provider:
+  name: aws
+  lambdaHashingVersion: '20201221'
+  profile: privateGmail
+  runtime: python3.8
+  stage: ${opt:stage, 'dev'}
+  region: eu-west-1
