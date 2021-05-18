@@ -50,6 +50,23 @@ resource "aws_cloudwatch_event_bus" "main" {
   name = format("%s_%s_bus", local.app, local.stage)
 }
 
+module "cloudfront_s3_website_with_domain" {
+  source                 = "../modules/cloudfront-s3-website"
+  hosted_zone            = "shortrlink.com"
+  domain_name            = "dev.shortrlink.com"
+  use_default_domain = true
+//  acm_certificate_domain = "*.shortrlink.com"
+
+  app_name = local.app
+  stage = local.stage
+}
+
+resource "aws_ssm_parameter" "website_bucket_name" {
+  name = format("/%s/%s/app_bucket_name", local.app, local.stage)
+  type = "String"
+  value = module.cloudfront_s3_website_with_domain.s3_bucket_name
+}
+
 resource "aws_ssm_parameter" "timestream_db_name" {
   name = format("/%s/%s/timestream_db_name", local.app, local.stage)
   type = "String"
