@@ -39,8 +39,27 @@ module "dynamodb_table" {
   stage = local.stage
 }
 
+module "timestreamdb" {
+  source = "../modules/timestream"
+
+  app_name = local.app
+  stage = local.stage
+}
+
 resource "aws_cloudwatch_event_bus" "main" {
   name = format("%s_%s_bus", local.app, local.stage)
+}
+
+resource "aws_ssm_parameter" "timestream_db_name" {
+  name = format("/%s/%s/timestream_db_name", local.app, local.stage)
+  type = "String"
+  value = module.timestreamdb.database_name
+}
+
+resource "aws_ssm_parameter" "timestream_redirectes_table_name" {
+  name = format("/%s/%s/timestream_redirects_table", local.app, local.stage)
+  type = "String"
+  value = module.timestreamdb.redirects_table_name
 }
 
 resource "aws_ssm_parameter" "table_arn" {
