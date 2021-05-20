@@ -2,7 +2,7 @@
   <div class="hello">
     <h1>{{ msg }}</h1>
     <input v-model="inputUrl" placeholder="https://www.google.com/" />
-    <button v-on:click="shortenOrCopyLink">{{ buttonText }}</button>
+    <button v-on:click="shortenOrCopyLink" class="btn btn-primary">{{ buttonText }}</button>
   </div>
 </template>
 
