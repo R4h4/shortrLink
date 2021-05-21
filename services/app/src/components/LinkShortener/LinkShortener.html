@@ -1,5 +1,4 @@
-<div class="hello">
-  <h1>{{ msg }}</h1>
-  <input v-model="inputUrl" placeholder="https://www.google.com/" class="form-control"  />
-  <button v-on:click="shortenOrCopyLink" class="btn btn-primary">{{ buttonText }}</button>
+<div class="input-group mb-3">
+  <input type="text" v-model="inputUrl" placeholder="https://www.google.com/" class="form-control" aria-label="https://www.google.com/" aria-describedby="button-addon2" />
+  <button v-on:click="shortenOrCopyLink" class="btn btn-primary mb-0" type="button" id="button-addon2">{{ buttonText }}</button>
 </div>
