@@ -1,6 +1,6 @@
 <template>
   <loader-component v-if="displayLoader"/>
-    <router-view/>
+  <router-view/>
   <notification-component/>
 </template>
 
