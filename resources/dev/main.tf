@@ -57,6 +57,11 @@ module "cognito_user_pool" {
 
   enable_username_case_sensitivity = false
   advanced_security_mode = "ENFORCED"
+  password_minimum_length = 8
+  password_require_lowercase = false
+  password_require_symbols = false
+  password_require_numbers = false
+  password_require_uppercase = false
 
   alias_attributes = [
     "email",
@@ -137,7 +142,7 @@ module "cognito_user_pool" {
       callback_urls = [
         "https://shortrlink.com/dashboard"]
       default_redirect_uri = "https://shortrlink.com/dashboard"
-      generate_secret = true
+      generate_secret = false
     }
   ]
 }
