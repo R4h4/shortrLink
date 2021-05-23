@@ -12022,7 +12022,7 @@ label, .form-label {
 }
 
 .bg-gradient-primary {
-  background-image: linear-gradient(310deg, #7928CA 0%, #FF0080 100%);
+  background-image: linear-gradient(310deg, #014448 0%, #00d4ff 100%);
 }
 
 .bg-gradient-secondary {
@@ -13251,7 +13251,7 @@ p {
 }
 
 .text-gradient.text-primary {
-  background-image: linear-gradient(310deg, #7928CA, #FF0080);
+  background-image: linear-gradient(310deg, #014448, #00d4ff);
 }
 
 .text-gradient.text-info {

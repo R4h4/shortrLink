@@ -2,7 +2,7 @@ import authLayout from '@/layouts/Auth'
 import httpAxios from '@/utils/http-axios'
 
 export default {
-    name: 'Login',
+    name: 'SignUp',
     data() {
         return {
             email: null,

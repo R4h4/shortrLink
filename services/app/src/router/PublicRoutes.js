@@ -1,6 +1,7 @@
 
 // Import Modules
-// const login = () => import('@/modules/Login')
+const login = () => import('@/modules/Login')
+const sign_up = () => import('@/modules/SignUp')
 const shorten = () => import('@/modules/Shorten')
 
 // Export
@@ -19,12 +20,18 @@ export default [
     //     redirect: '/admin/dashboard' 
     // },
 
-    // // Login
-    // {
-    //     path: '/admin/login',
-    //     component: login ,
-    //     name: 'admin.login',
-    //     meta: { guest: true }
-    // },
+    // Login
+    {
+        path: '/login',
+        component: login ,
+        name: 'login',
+        meta: { guest: true }
+    },
+    {
+      path: '/sign-up',
+      component: sign_up ,
+      name: 'signUp',
+      meta: { guest: true }
+  },
 
 ]
