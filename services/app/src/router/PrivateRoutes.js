@@ -1,13 +1,12 @@
 
 // Import Modules
-import auth from '@/middleware/auth'
 const dashboard = () => import('@/modules/Dashboard')
 import UserInfoStore from '@/store/user-info-store';
 import UserInfoApi from '@/utils/user-info-api';
 
 
 function requireAuth(to, from, next) {
-  if (!auth.auth.isUserSignedIn()) {
+  if (!this.$cognitoAuth.isAuthenticated()) {
       UserInfoStore.setLoggedIn(false);
       next({
       path: '/login',

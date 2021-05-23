@@ -1,30 +1,35 @@
 import authLayout from '@/layouts/Auth'
-import httpAxios from '@/utils/http-axios'
 
 export default {
     name: 'SignUp',
     data() {
         return {
             email: null,
-            password: null
+            password: null,
+            username: null
         }
     },
     components: {
         authLayout
     },
     methods: {
-        login() {
-            const self = this
-
-            httpAxios({
-                url: '/login',
-                method: 'POST',
-                data: { email: self.email, password: self.password }
-            }).then(async response => {
-                self.$store.commit('LOGGED_USER', response.data)
-
-                self.$router.go({ name: 'admin.dashboard' })
-            })
+        signup() {
+            console.log(self.$store)
+            this.loading = true;
+            this.$cognitoAuth.signup(
+              this.username,
+              this.email,
+              this.password,
+              (err, result) => {
+                console.log(result);
+                if (err.statusCode !== 200) {
+                  console.log(err);
+                  this.error = err;
+                } else {
+                  this.$router.replace("/dashboard");
+                }
+              }
+            );
         }
     }
 }

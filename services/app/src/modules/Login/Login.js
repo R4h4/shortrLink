@@ -6,7 +6,7 @@ export default {
     name: 'Login',
     data() {
         return {
-            email: null,
+            username: null,
             password: null
         }
     },
@@ -19,7 +19,7 @@ export default {
             this.loading = true;
             this.$cognitoAuth.authenticate(
               this.username,
-              this.pass,
+              this.password,
               (err, result) => {
                 console.log(result);
                 if (err.statusCode !== 200) {
