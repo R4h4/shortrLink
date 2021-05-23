@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "cp .env.prod .env && vue-cli-service build",
+    "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
     "copy-dev-env": "cp .env.dev .env",
     "deploy": "npm run build && aws s3 sync dist s3://shortrlink.com --delete --grant read=uri=http://acs.amazonaws.com/groups/global/AllUsers --profile privateGmail"
@@ -13,6 +13,7 @@
     "@dafcoe/vue-notification": "^0.1.5",
     "@fortawesome/fontawesome-free": "^5.15.3",
     "@popperjs/core": "^2.9.2",
+    "aws-sdk": "^2.912.0",
     "axios": "^0.21.1",
     "bootstrap": "^5.0.0-beta3",
     "core-js": "^3.6.5",
@@ -26,10 +27,11 @@
     "@vue/cli-plugin-eslint": "~4.5.0",
     "@vue/cli-service": "~4.5.0",
     "@vue/compiler-sfc": "^3.0.0",
+    "amazon-cognito-auth-js": "^1.3.3",
+    "amazon-cognito-identity-js": "^5.0.1",
     "babel-eslint": "^10.1.0",
     "eslint": "^6.7.2",
-    "eslint-plugin-vue": "^7.0.0",
-    "serverless-s3-sync": "^1.17.1"
+    "eslint-plugin-vue": "^7.0.0"
   },
   "eslintConfig": {
     "root": true,
