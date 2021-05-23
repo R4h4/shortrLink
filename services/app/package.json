@@ -5,7 +5,8 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "deploy": "npm run build && aws s3 sync dist s3://shortrlink.com --delete --grant read=uri=http://acs.amazonaws.com/groups/global/AllUsers --profile privateGmail"
   },
   "dependencies": {
     "@dafcoe/vue-notification": "^0.1.5",

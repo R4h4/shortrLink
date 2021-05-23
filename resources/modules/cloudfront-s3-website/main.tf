@@ -1,17 +1,12 @@
 
 provider "aws" {
   region = "us-east-1"
+  profile = "privateGmail"
   alias  = "aws_cloudfront"
 }
 
-locals {
-  default_certs = var.use_default_domain ? ["default"] : []
-  acm_certs     = var.use_default_domain ? [] : ["acm"]
-  domain_name   = var.use_default_domain ? [] : [var.domain_name]
-}
 
 data "aws_acm_certificate" "acm_cert" {
-  count    = var.use_default_domain ? 0 : 1
   domain   = coalesce(var.acm_certificate_domain, "*.${var.hosted_zone}")
 
   provider = aws.aws_cloudfront
@@ -43,29 +38,48 @@ data "aws_iam_policy_document" "s3_bucket_policy" {
   }
 }
 
-resource "aws_s3_bucket" "s3_bucket" {
+# Creates bucket to store logs
+resource "aws_s3_bucket" "website_logs" {
+  bucket = "${var.domain_name}-logs"
+  acl    = "log-delivery-write"
+
+  # Comment the following line if you are uncomfortable with Terraform destroying the bucket even if this one is not empty
+  force_destroy = true
+
+  lifecycle {
+    ignore_changes = [tags["Changed"]]
+  }
+}
+
+resource "aws_s3_bucket" "website_root" {
   bucket = var.domain_name
   acl    = "private"
   versioning {
     enabled = true
+  }
+    logging {
+    target_bucket = aws_s3_bucket.website_logs.bucket
+    target_prefix = "${var.domain_name}/"
+  }
+  website {
+    index_document = "index.html"
+    error_document = "404.html"
   }
   policy = data.aws_iam_policy_document.s3_bucket_policy.json
   tags   = var.tags
 }
 
 data "aws_route53_zone" "domain_name" {
-  count        = var.use_default_domain ? 0 : 1
   name         = var.hosted_zone
   private_zone = false
 }
 
 resource "aws_route53_record" "route53_record" {
-  count = var.use_default_domain ? 0 : 1
   depends_on = [
     aws_cloudfront_distribution.s3_distribution
   ]
 
-  zone_id = data.aws_route53_zone.domain_name[0].zone_id
+  zone_id = data.aws_route53_zone.domain_name.zone_id
   name    = var.domain_name
   type    = "A"
 
@@ -78,25 +92,57 @@ resource "aws_route53_record" "route53_record" {
   }
 }
 
+# Creates bucket for the website handling the redirection (if required), e.g. from https://www.example.com to https://example.com
+resource "aws_s3_bucket" "website_redirect" {
+  bucket        = "${var.domain_name}-redirect"
+  acl           = "public-read"
+  force_destroy = true
+
+  logging {
+    target_bucket = aws_s3_bucket.website_logs.bucket
+    target_prefix = "${var.domain_name}-redirect/"
+  }
+
+  website {
+    redirect_all_requests_to = "https://${var.domain_name}"
+  }
+
+  lifecycle {
+    ignore_changes = [tags["Changed"]]
+  }
+}
+
 resource "aws_cloudfront_distribution" "s3_distribution" {
   depends_on = [
-    aws_s3_bucket.s3_bucket
+    aws_s3_bucket.website_root
   ]
 
   origin {
-    domain_name = "${var.domain_name}.s3.amazonaws.com"
-    origin_id   = "s3-cloudfront"
-
-    s3_origin_config {
-      origin_access_identity = aws_cloudfront_origin_access_identity.origin_access_identity.cloudfront_access_identity_path
+    domain_name = aws_s3_bucket.website_root.website_endpoint
+//    origin_id   = "s3-cloudfront"
+    origin_id = "origin-bucket-${aws_s3_bucket.website_root.id}"
+    custom_origin_config {
+      http_port = 80
+      https_port = 443
+      origin_protocol_policy = "http-only"
+      origin_ssl_protocols = ["TLSv1.2", "TLSv1.1", "TLSv1"]
     }
+//    s3_origin_config {
+//      origin_access_identity = aws_cloudfront_origin_access_identity.origin_access_identity.cloudfront_access_identity_path
+//    }
+
+  }
+
+  logging_config {
+    bucket = aws_s3_bucket.website_logs.bucket_domain_name
+    prefix = "${var.domain_name}/"
   }
 
   enabled             = true
   is_ipv6_enabled     = true
   default_root_object = "index.html"
 
-  aliases = local.domain_name
+  aliases = [var.domain_name]
 
   default_cache_behavior {
     allowed_methods = [
@@ -109,11 +155,9 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
       "HEAD",
     ]
 
-    target_origin_id = "s3-cloudfront"
-
+    target_origin_id = "origin-bucket-${aws_s3_bucket.website_root.id}"
     forwarded_values {
       query_string = false
-
       cookies {
         forward = "none"
       }
@@ -132,21 +176,25 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
       restriction_type = "none"
     }
   }
-  dynamic "viewer_certificate" {
-    for_each = local.default_certs
-    content {
-      cloudfront_default_certificate = true
-    }
+  viewer_certificate {
+    acm_certificate_arn = data.aws_acm_certificate.acm_cert.arn
+    ssl_support_method  = "sni-only"
   }
-
-  dynamic "viewer_certificate" {
-    for_each = local.acm_certs
-    content {
-      acm_certificate_arn      = data.aws_acm_certificate.acm_cert[0].arn
-      ssl_support_method       = "sni-only"
-      minimum_protocol_version = "TLSv1"
-    }
-  }
+//  dynamic "viewer_certificate" {
+//    for_each = local.default_certs
+//    content {
+//      cloudfront_default_certificate = true
+//    }
+//  }
+//
+//  dynamic "viewer_certificate" {
+//    for_each = local.acm_certs
+//    content {
+//      acm_certificate_arn      = data.aws_acm_certificate.acm_cert[0].arn
+//      ssl_support_method       = "sni-only"
+//      minimum_protocol_version = "TLSv1"
+//    }
+//  }
 
   custom_error_response {
     error_code            = 403
@@ -157,6 +205,112 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
 
   wait_for_deployment = false
   tags                = var.tags
+}
+
+# Creates policy to allow public access to the S3 bucket
+resource "aws_s3_bucket_policy" "update_website_root_bucket_policy" {
+  bucket = aws_s3_bucket.website_root.id
+
+  policy = <<POLICY
+{
+  "Version": "2012-10-17",
+  "Id": "PolicyForWebsiteEndpointsPublicContent",
+  "Statement": [
+    {
+      "Sid": "PublicRead",
+      "Effect": "Allow",
+      "Principal": "*",
+      "Action": [
+        "s3:GetObject"
+      ],
+      "Resource": [
+        "${aws_s3_bucket.website_root.arn}/*",
+        "${aws_s3_bucket.website_root.arn}"
+      ]
+    }
+  ]
+}
+POLICY
+}
+
+# Creates the CloudFront distribution to serve the redirection website (if redirection is required)
+resource "aws_cloudfront_distribution" "website_cdn_redirect" {
+  enabled     = true
+  price_class = "PriceClass_All"
+  # Select the correct PriceClass depending on who the CDN is supposed to serve (https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/PriceClass.html)
+  aliases = [var.website_domain_redirect]
+
+  origin {
+    origin_id   = "origin-bucket-${aws_s3_bucket.website_redirect.id}"
+    domain_name = aws_s3_bucket.website_redirect.website_endpoint
+
+    custom_origin_config {
+      http_port              = 80
+      https_port             = 443
+      origin_protocol_policy = "http-only"
+      origin_ssl_protocols   = ["TLSv1", "TLSv1.1", "TLSv1.2"]
+    }
+  }
+
+  logging_config {
+    bucket = aws_s3_bucket.website_logs.bucket_domain_name
+    prefix = "${var.website_domain_redirect}/"
+  }
+
+  default_cache_behavior {
+    allowed_methods  = ["GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT", "DELETE"]
+    cached_methods   = ["GET", "HEAD"]
+    target_origin_id = "origin-bucket-${aws_s3_bucket.website_redirect.id}"
+    min_ttl          = "0"
+    default_ttl      = "300"
+    max_ttl          = "1200"
+
+    viewer_protocol_policy = "redirect-to-https" # Redirects any HTTP request to HTTPS
+    compress               = true
+
+    forwarded_values {
+      query_string = false
+      cookies {
+        forward = "none"
+      }
+    }
+  }
+
+  restrictions {
+    geo_restriction {
+      restriction_type = "none"
+    }
+  }
+
+  viewer_certificate {
+    acm_certificate_arn = data.aws_acm_certificate.acm_cert.arn
+    ssl_support_method  = "sni-only"
+  }
+
+//  tags = merge(var.tags, {
+//    ManagedBy = "terraform"
+//    Changed   = formatdate("YYYY-MM-DD hh:mm ZZZ", timestamp())
+//  })
+
+  lifecycle {
+    ignore_changes = [
+      tags["Changed"],
+      viewer_certificate,
+    ]
+  }
+}
+
+# Creates the DNS record to point on the CloudFront distribution ID that handles the redirection website
+resource "aws_route53_record" "website_cdn_redirect_record" {
+  zone_id = data.aws_route53_zone.domain_name.zone_id
+  name    = var.website_domain_redirect
+  type    = "A"
+
+  alias {
+    name                   = aws_cloudfront_distribution.website_cdn_redirect.domain_name
+    zone_id                = aws_cloudfront_distribution.website_cdn_redirect.hosted_zone_id
+    evaluate_target_health = false
+  }
 }
 
 resource "aws_cloudfront_origin_access_identity" "origin_access_identity" {

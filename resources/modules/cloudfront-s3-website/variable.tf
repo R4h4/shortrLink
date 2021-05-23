@@ -22,6 +22,10 @@ variable "hosted_zone" {
   description = "Route53 hosted zone"
 }
 
+variable "website_domain_redirect" {
+  description = "Additional domain to redict to primary website"
+}
+
 variable "acm_certificate_domain" {
   default     = null
   description = "Domain of the ACM certificate"
@@ -35,9 +39,4 @@ variable "acm_certificate_arn" {
 variable "price_class" {
   default     = "PriceClass_100" // Only US,Canada,Europe
   description = "CloudFront distribution price class"
-}
-
-variable "use_default_domain" {
-  default     = false
-  description = "Use CloudFront website address without Route53 and ACM certificate"
 }
