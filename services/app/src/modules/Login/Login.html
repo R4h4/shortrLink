@@ -1,29 +1,33 @@
 <authLayout>
-    <div class="card card-plain mt-8">
-        <div class="card-header pb-0 text-left bg-transparent">
-            <h3 class="font-weight-bolder text-primary text-gradient">Login</h3>
-            <p
-                class="mb-0">
-                Enter your username and password to sign in.</p>
+  <div class="card card-plain mt-8">
+    <div class="card-header pb-0 text-left bg-transparent">
+      <h3 class="font-weight-bolder text-primary text-gradient">Login</h3>
+      <p class="mb-0">
+        Enter your username and password to sign in.
+      </p>
+    </div>
+    <div class="card-body">
+      <form role="form text-left">
+        <div class="mb-3">
+           <input type="text" class="form-control" placeholder="username" aria-label="Username" v-model="username">
         </div>
-        <div class="card-body">
-            <form role="form text-left">
-                <div class="mb-3">
-                    <input type="text" class="form-control" placeholder="username" aria-label="Username" v-model="username">
-                </div>
-                <div class="mb-3">
-                    <input type="password" class="form-control" placeholder="Password" aria-label="Password" v-model="password">
-                </div>
-                <div class="text-center">
-                    <button type="button" class="btn bg-gradient-primary w-100 my-4 mb-2" @click="login">Sign in</button>
-                </div>
-            </form>
-        </div>
-        <div class="card-footer text-center pt-0 px-lg-2 px-1">
-            <p class="mb-4 text-sm mx-auto">
-              Don't have an account?
-              <a href="./sign-up" class="text-dark font-weight-bold">Sign up</a>
+        <div class="mb-3">
+            <input type="password" class="form-control" placeholder="Password" aria-label="Password" v-model="password">
+            <p v-if="error" class="text-warning initialism">
+              User/password incorrect. 
+              <a href="./reset-password">Reset password</a>
             </p>
         </div>
+        <div class="text-center">
+            <button type="button" class="btn bg-gradient-primary w-100 my-4 mb-2" @click="login">Sign in</button>
+        </div>
+      </form>
     </div>
+    <div class="card-footer text-center pt-0 px-lg-2 px-1">
+      <p class="mb-4 text-sm mx-auto">
+        Don't have an account?
+        <a href="./sign-up" class="text-dark font-weight-bold">Sign up</a>
+      </p>
+    </div>
+  </div>
 </authLayout>

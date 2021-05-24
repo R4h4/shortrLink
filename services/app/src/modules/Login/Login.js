@@ -1,13 +1,12 @@
-// import auth from '@/middleware/auth'
 import authLayout from '@/layouts/Auth'
-// import httpAxios from '@/utils/http-axios'
 
 export default {
     name: 'Login',
     data() {
         return {
             username: null,
-            password: null
+            password: null,
+            error: null
         }
     },
     components: {
@@ -15,7 +14,6 @@ export default {
     },
     methods: {
         login() {
-            console.log(self.$store)
             this.loading = true;
             this.$cognitoAuth.authenticate(
               this.username,

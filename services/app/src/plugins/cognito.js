@@ -14,10 +14,11 @@ function CognitoAuth(config) {
     throw new Error('[CognitoAuth error] valid option object required')
   }
   this.userPool = new CognitoUserPool({
-    UserPoolId: config.IdentityPoolId,
+    UserPoolId: config.UserPoolId,
     ClientId: config.ClientId
   })
   Config.region = config.region
+  Config.UserPoolId = config.UserPoolId
   Config.credentials = new CognitoIdentityCredentials({
     IdentityPoolId: config.IdentityPoolId
   })
@@ -54,6 +55,26 @@ CognitoAuth.prototype.getCurrentUser = function () {
   return this.userPool.getCurrentUser()
 }
 
+CognitoAuth.prototype.forgotPassword = function(username, cb) {
+  let userData = { Username: username, Pool: this.userPool }
+  let cognitoUser = new CognitoUser(userData)
+
+  cognitoUser.forgotPassword({
+    onSuccess: function (result) {
+      cb(null, result)
+    },
+    onFailure: function (err) {
+      cb(err);
+    },        
+    inputVerificationCode() {
+      var verificationCode = prompt('Please input verification code ' ,'');
+      var newPassword = prompt('Enter new password ' ,'');
+      console.log(`New password: ${newPassword}`)
+      cognitoUser.confirmPassword(verificationCode, newPassword, this);
+    }  
+  })
+}
+
 CognitoAuth.prototype.authenticate  = function(username, pass, cb) {
   let authenticationData = { Username: username, Password: pass }
   let authenticationDetails = new AuthenticationDetails(authenticationData)
@@ -64,11 +85,11 @@ CognitoAuth.prototype.authenticate  = function(username, pass, cb) {
       onSuccess: function (result) {
           console.log('access token + ' + result.getAccessToken().getJwtToken())
           var logins = {}
-          logins['cognito-idp.' + this.options.region + '.amazonaws.com/' + this.options.UserPoolId] = result.getIdToken().getJwtToken()
+          logins['cognito-idp.' + Config.region + '.amazonaws.com/' + Config.UserPoolId] = result.getIdToken().getJwtToken()
           console.log(logins)
 
           Config.credentials = new CognitoIdentityCredentials({
-              IdentityPoolId: this.options.UserPoolId,
+              IdentityPoolId: Config.UserPoolId,
               Logins: logins
           })
           console.log(Config.credentials)

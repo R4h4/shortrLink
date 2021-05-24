@@ -6,7 +6,7 @@ import UserInfoApi from '@/utils/user-info-api';
 
 
 function requireAuth(to, from, next) {
-  if (!this.$cognitoAuth.isAuthenticated()) {
+  if (!self.$cognitoAuth.isAuthenticated()) {
       UserInfoStore.setLoggedIn(false);
       next({
       path: '/login',

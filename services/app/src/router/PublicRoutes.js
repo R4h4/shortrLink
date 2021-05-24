@@ -3,6 +3,7 @@
 const login = () => import('@/modules/Login')
 const sign_up = () => import('@/modules/SignUp')
 const shorten = () => import('@/modules/Shorten')
+const reset_password = () => import('@/modules/ResetPassword')
 
 // Export
 export default [
@@ -33,5 +34,11 @@ export default [
       name: 'signUp',
       meta: { guest: true }
   },
+  {
+    path: '/reset-password',
+    component: reset_password ,
+    name: 'resetPassword',
+    meta: { guest: true }
+},
 
 ]
