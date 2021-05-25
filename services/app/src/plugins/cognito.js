@@ -6,6 +6,7 @@ import {
   CognitoUserAttribute
 } from "amazon-cognito-identity-js";
 // import { ConfigurationServicePlaceholders } from "aws-sdk/lib/config_service_placeholders";
+import store from '@/store'
 
 function CognitoAuth(config) {
   this.userSession = null;
@@ -93,6 +94,7 @@ CognitoAuth.prototype.authenticate  = function(username, pass, cb) {
               Logins: logins
           })
           console.log(Config.credentials)
+          store.commit("auth/setUserAuthenticated", username, result.getAccessToken().getJwtToken())
           // this.onChange(true)
           cb(null, result)
       },
@@ -123,7 +125,8 @@ CognitoAuth.prototype.confirmRegistration = function (username, code, cb) {
 */
 CognitoAuth.prototype.logout = function () {
   this.getCurrentUser().signOut()
-  this.onChange(false)
+  store.commit("auth/clearAuthentication")
+  // this.onChange(false)
 }
 
 /**

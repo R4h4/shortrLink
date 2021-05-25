@@ -1,6 +1,8 @@
 const state = {
 	displayLoader: false,
   user: null,
+  userId: null,
+  accessToken: null,
   isAuthenticated: false,
   authenticationStatus: null
 };
@@ -15,7 +17,9 @@ const getters = {
 	},
 	hasAuthenticationStatus: state => {
 		return !!state.authenticationStatus
-	}
+  },
+  getUserInformation: state => state.user,
+  getAccessToken: state => state.accessToken
 };
 
 const mutations = {
@@ -30,9 +34,10 @@ const mutations = {
   clearAuthenticationStatus: state => {
     state.authenticationStatus = null;
   },
-  setUserAuthenticated(state, user) {
+  setUserAuthenticated(state, user, accessToken) {
     state.user = user;
     state.isAuthenticated = true;
+    state.accessToken = accessToken
   },
   clearAuthentication(state) {
     state.user = null;

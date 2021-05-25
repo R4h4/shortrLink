@@ -1,27 +1,13 @@
 <template>
-  <mainLayout>
-    <div class="row mt-lg-n10 mt-md-n11 mt-n10">
-        <div class="col-xl-6 col-lg-8 col-md-10 mx-auto">
-            <div class="card z-index-0">
-                <!-- <div class="card-header text-center pt-4">
-                    <h1>Shorten Any Links</h1>
-                    <p
-                        class="text-md font-weight-bold mb-2 text-secondary text-border d-inline z-index-2 bg-white px-3 mt-2">
-                        Build and protect your brand using powerful and recognizable short links. <a class="text-primary font-weight-normal">It's free forever!</a>
-                      </p>
-                </div> -->
-                <div class="card-body mt-3">
-                  Dashboard
-                </div>
-            </div>
-        </div>
-    </div>
-  </mainLayout>
+  <dashboardLayout>
+    Dashboard
+  </dashboardLayout>
 </template>
 
 <script>
-import mainLayout from '@/layouts/Main'
+import dashboardLayout from '@/layouts/Dashboard'
 // import httpAxios from '@/utils/http-axios'
+import store from '@/store'
 
 export default {
   name: 'Dashboard',
@@ -29,8 +15,15 @@ export default {
       return {
       }
   },
+  created() {
+    const user = store.getters["auth/getUserInformation"]
+    console.log(user)
+  },
   components: {
-    mainLayout,
-  }
+    dashboardLayout,
+  },
+  methods: {
+    
+  },
 }
 </script>

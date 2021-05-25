@@ -1,7 +1,7 @@
 import authLayout from '@/layouts/Auth'
 
 export default {
-    name: 'Login',
+    name: 'SignIn',
     data() {
         return {
             username: null,
@@ -21,10 +21,11 @@ export default {
               (err, result) => {
                 console.log(result);
                 if (err) {
-                  console.log(err);
+                  console.log(`Got error: ${err}`);
                   this.error = err;
                 } else {
-                  this.$router.replace("/dashboard");
+                  console.log('Redirecting to dashboard')
+                  this.$router.go({ name: 'dashboard' });
                 }
               }
             );

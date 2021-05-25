@@ -1,6 +1,7 @@
 
 // Import Modules
 const dashboard = () => import('@/modules/Dashboard')
+const signout = () => import('@/modules/SignOut')
 // import UserInfoStore from '@/store/user-info-store';
 // import UserInfoApi from '@/utils/user-info-api';
 
@@ -23,13 +24,18 @@ const dashboard = () => import('@/modules/Dashboard')
 
 // Export
 export default [
-    // Home
-    {
-      path: '/dashboard',
-      component: dashboard,
-      name: 'Dashboard',
-      // beforeEnter: requireAuth,
-      meta: {title: 'shortrLink Dashboard', auth: true}
-    },
-
+  // Home
+  {
+    path: '/dashboard',
+    component: dashboard,
+    name: 'dashboard',
+    // beforeEnter: requireAuth,
+    meta: { title: 'shortrLink Dashboard', auth: true }
+  },
+  {
+    path: '/sign-out',
+    component: signout,
+    name: 'signOut',
+    meta: { title: 'shortrLink | Logging out', auth: true }
+  }
 ]
