@@ -20,7 +20,7 @@ export default {
               this.password,
               (err, result) => {
                 console.log(result);
-                if (err.statusCode !== 200) {
+                if (err) {
                   console.log(err);
                   this.error = err;
                 } else {

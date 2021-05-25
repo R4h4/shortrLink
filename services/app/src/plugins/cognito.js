@@ -2,7 +2,7 @@ import { Config, CognitoIdentityCredentials } from "aws-sdk";
 import {
  CognitoUser,
   CognitoUserPool,
- AuthenticationDetails,
+  AuthenticationDetails,
   CognitoUserAttribute
 } from "amazon-cognito-identity-js";
 // import { ConfigurationServicePlaceholders } from "aws-sdk/lib/config_service_placeholders";
@@ -93,7 +93,7 @@ CognitoAuth.prototype.authenticate  = function(username, pass, cb) {
               Logins: logins
           })
           console.log(Config.credentials)
-          this.onChange(true)
+          // this.onChange(true)
           cb(null, result)
       },
       onFailure: function (err) {

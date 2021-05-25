@@ -12,7 +12,8 @@ export default [
     {
       path: '/',
       component: shorten,
-      name: 'Shorten'
+      name: 'Shorten',
+      meta: { title: "shortrLink | Shorter links for everyone", auth: false }
     },
 
     // // Home
@@ -26,19 +27,19 @@ export default [
         path: '/login',
         component: login ,
         name: 'login',
-        meta: { guest: true }
+        meta: { auth: false  }
     },
     {
       path: '/sign-up',
       component: sign_up ,
       name: 'signUp',
-      meta: { guest: true }
+      meta: { auth: false }
   },
   {
     path: '/reset-password',
     component: reset_password ,
     name: 'resetPassword',
-    meta: { guest: true }
+    meta: { auth: false }
 },
 
 ]

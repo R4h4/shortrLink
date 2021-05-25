@@ -2,7 +2,7 @@
 import { createWebHistory, createRouter } from 'vue-router'
 import publicRoutes from './PublicRoutes.js'
 import privateRoutes from './PrivateRoutes.js'
-// import store from '@/store'
+import store from '@/store'
 
 // Start vue router
 const router = createRouter({
@@ -10,48 +10,39 @@ const router = createRouter({
     routes: [...publicRoutes, ...privateRoutes]
 })
 
-// Middlewares
-// router.beforeEach((to, from, next) => {
-//     // Redirect to route
-//     let redirectToRoute = function (name) {
-//         if (name === from.name) {
-//             next()
-//             return
-//         }
-
-//         next({ name: name })
-//     }
-
-//     // Get logged user
-//     let loggedUser = store.getters.getLoggedUser
-
-//     // Check if access token expired
-//     if (loggedUser) {
-//         let currentDateTime = new Date().getTime()
-//         if (currentDateTime > loggedUser.expiryDate) {
-//             store.dispatch('logOut')
-//             return redirectToRoute('admin.login')
-//         }
-//     }
-
-//     // Auth
-//     if (to.meta.auth) {
-//         if (loggedUser)
-//             return next()
-//         else
-//             return redirectToRoute('admin.login')
-//     }
-
-//     // Guest
-//     if (to.meta.guest) {
-//         if (loggedUser)
-//             return redirectToRoute('admin.dashboard')
-//         else
-//             return next()
-//     }
-
-//     next()
-// })
+// this routine will ensure that any pages marked as `auth` in the `meta` section are
+// protected from access by unauthenticated users.
+router.beforeEach((to, from, next) => {
+    // Use the page's router title to name the page
+    if (to.meta && to.meta.title) {
+      document.title = to.meta.title;
+    }
+  
+    // is there a meta and auth attribute?
+    if (to.meta && to.meta.auth !== undefined) {
+      // if the page requires auth
+      if (to.meta.auth) {
+        // and we are authenticated?
+        if (store.getters["auth/isAuthenticated"]) {
+          next(); // route normally
+          return;
+        }
+        // otherwise off to the sign in page
+        router.push({ name: "signIn" });
+        return;
+      }
+      // otherwise are we already authenticated?
+      if (store.getters["auth/isAuthenticated"]) {
+        // yes we are, so off to dashboard
+        router.push({ name: "dashboard" });
+        return;
+      }
+      next(); // route normally
+      return;
+    }
+    next(); // route normally
+    return;
+  });
 
 // Export
 export default router

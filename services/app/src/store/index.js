@@ -1,17 +1,20 @@
 import { createStore } from 'vuex'
+import createPersist from "vuex-localstorage";
 
-import actions from './actions'
-import getters from './getters'
-import mutations from './mutations'
-
-const state = {
-	displayLoader: false,
-	loggedUser: localStorage.getItem('loggedUser') || null
-}
+// Modules
+import auth from "./modules/auth";
 
 export default createStore({
-	state,
-	actions,
-	getters,
-	mutations
-})
+  modules: {
+    auth
+  },
+//  strict: debug,
+  plugins: [
+    createPersist({
+      namespace: "shortrlink",
+      initialState: {},
+      // ONE_WEEK
+      expires: 7 * 24 * 60 * 60 * 1e3
+    })
+  ]
+});
