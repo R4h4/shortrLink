@@ -27,7 +27,15 @@ def handler(event, context):
         },
         'body': json.dumps({
             'links': [
-                dict(link) for link in links
+                {
+                    'id': link.id,
+                    'clicks': link.clicks,
+                    'title': link.title,
+                    'createdAt': str(link.createdAt),
+                    'url': link.url
+                } for link in links
             ],
+            'lastToken': links.last_evaluated_key,
+            'count': links.total_count
         })
     }

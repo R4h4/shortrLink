@@ -1,12 +1,20 @@
 import os
 import json
 import logging
+import datetime as dt
 
 from shortid import ShortId
+import boto3
+from aws_xray_sdk.core import xray_recorder
+from aws_xray_sdk.core import patch_all
 
 from src.models import ShortenedLink
 from src.exceptions import ExternalError, InternalError
 
+client = boto3.client('events')
+
+# apply the XRay handler to all clients.
+patch_all()
 
 shortid = ShortId()
 logger = logging.getLogger(__name__)
@@ -45,6 +53,30 @@ def handler(event, context):
             link.save()
         except KeyError as e:
             raise ExternalError(f'Invalid input body/missing fields: {e}')
+
+        # Let known that we created a link. Using event publishing instead of DynamodDb stream to avoid unecessary
+        # Lambda invocations on updates
+        try:
+            res = client.put_events(
+                Entries=[
+                    {
+                        'Time': dt.datetime.now(),
+                        'Source': 'shortrLinks.lambda',
+                        'Resources': [
+                            context.invoked_function_arn
+                        ],
+                        'DetailType': 'shortrLink link created',
+                        'Detail': json.dumps({
+                            'link_id': link.id
+                        }),
+                        'EventBusName': os.environ['EVENT_BUS_NAME']
+                    },
+                ]
+            )
+            if res.get('FailedEntryCount'):
+                logger.exception(f'Failed publishing click/redirect event. result: {res}')
+        except Exception as e:
+            logger.exception(f'Error putting event: {str(e)}')
 
         return {
             'statusCode': 201,

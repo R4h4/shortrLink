@@ -53,6 +53,7 @@ provider:
   logs:
     httpApi: true
   environment:
+    EVENT_BUS_NAME: '${ssm:/shortrLink/${sls:stage}/eventbus_name}'
     DYNAMODB_TABLE: '${ssm:/shortrLink/${sls:stage}/dynamodb_table_name}'
     STAGE: '${sls:stage}'
     BASE_DOMAIN: 'shortr.link'
@@ -70,7 +71,9 @@ provider:
             - "dynamodb:PutItem"
             - "dynamodb:UpdateItem"
             - "dynamodb:DescribeTable"
-          Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${ssm:/shortrLink/${sls:stage}/dynamodb_table_name}"
+          Resource:
+            - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${ssm:/shortrLink/${sls:stage}/dynamodb_table_name}"
+            - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${ssm:/shortrLink/${sls:stage}/dynamodb_table_name}/*"
         - Effect: "Allow"
           Action:
             - "timestream:Select"
@@ -85,12 +88,19 @@ provider:
             - "timestream:DescribeEndpoints"
           Resource:
             - '*'
+        - Effect: "Allow"
+          Action:
+            - "events:PutEvents"
+          Resource:
+            - 'arn:aws:events:${self:provider.region}:*:event-bus/${ssm:/shortrLink/${sls:stage}/eventbus_name}'
 
 functions:
   createShortenedLink:
     handler: src/handlers/create_link.handler
     events:
       - httpApi:
+          authorizer:
+            name: baseJwtAuthorizer
           method: POST
           path: '/short-links'
   createShortenedLinkAnon:
