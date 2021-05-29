@@ -13,10 +13,10 @@ from src.models import ShortenedLink
 from src.exceptions import ExternalError, InternalError
 
 
+client = boto3.client('events')
+
 # apply the XRay handler to all clients.
 patch_all()
-
-client = boto3.client('events')
 
 logger = logging.getLogger(__name__)
 if os.environ['STAGE'] == 'dev':
