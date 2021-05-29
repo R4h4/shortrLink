@@ -1,4 +1,5 @@
 import store from '@/store'
+import shortrLink from '@/components/LinkShortener'
 
 export default {
   name: 'Navbar',
@@ -10,6 +11,9 @@ export default {
     isAuthenticated() {
       return store.getters['auth/isAuthenticated']
     }
+  },
+  components: {
+    shortrLink
   },
   methods: {
   }

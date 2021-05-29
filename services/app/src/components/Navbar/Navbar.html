@@ -11,7 +11,7 @@ class="navbar navbar-expand-lg navbar-light bg-white z-index-3 py-3 shadow-none 
     <div class="collapse navbar-collapse" id="navigation">
       <div v-if="isAuthenticated">
         <ul class="navbar-nav navbar-nav-hover ms-auto">
-          <div class="row justify-content-end">
+          <div class="row ">
             <div class="col-auto m-auto">
               <a class="nav-link text-secondary" href="https://github.com/R4h4/shortrLink" target="_blank">
                 GitHub
@@ -21,6 +21,13 @@ class="navbar navbar-expand-lg navbar-light bg-white z-index-3 py-3 shadow-none 
               <a class="nav-item nav-link text-secondary" href="./sign-out">
                 Logout
               </a>
+            </div>
+            <div class="col-auto">
+              <div class="bg-white border-radius-lg d-flex me-2">
+                <button type="button" class="btn bg-gradient-primary mb-0" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                  Create new link
+                </button>
+              </div>
             </div>
           </div>
         </ul>
@@ -51,4 +58,19 @@ class="navbar navbar-expand-lg navbar-light bg-white z-index-3 py-3 shadow-none 
     </div>
   </div>
 </nav>
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="false">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Create new link</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <shortrLink class="mt-2" />
+      </div>
+    </div>
+  </div>
+</div>
 <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet" />
