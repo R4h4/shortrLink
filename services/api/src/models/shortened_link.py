@@ -1,8 +1,24 @@
 import os
 from datetime import datetime
 
+from pynamodb.indexes import GlobalSecondaryIndex, AllProjection
 from pynamodb.attributes import UnicodeAttribute, UTCDateTimeAttribute, NumberAttribute
 from pynamodb.models import Model
+
+
+class UserCreatedAtIndex(GlobalSecondaryIndex):
+    """
+    This index represents the global secondary index to query all links a specific user created
+    """
+    class Meta:
+        index_name = 'UserCreatedAtIndex'
+        projection = AllProjection()
+        # Arbitrary to avoid errors
+        read_capacity_units = 1
+        write_capacity_units = 1
+
+    user = UnicodeAttribute(hash_key=True)
+    createdAt = UTCDateTimeAttribute(range_key=True)
 
 
 class ShortenedLink(Model):
@@ -21,9 +37,12 @@ class ShortenedLink(Model):
     SK = UnicodeAttribute(range_key=True)
     _type = UnicodeAttribute(default='ShortenedLink')
 
+    user_created_index = UserCreatedAtIndex()
+
     id = UnicodeAttribute(null=False)
     url = UnicodeAttribute(null=False)
     user = UnicodeAttribute(null=True)
+    title = UnicodeAttribute(null=True)
 
     clicks = NumberAttribute(null=False, default_for_new=0)
 

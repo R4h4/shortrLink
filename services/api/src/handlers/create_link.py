@@ -29,11 +29,18 @@ def handler(event, context):
             body = json.loads(event['body'])
         except json.JSONDecodeError:
             raise ExternalError('Body is not a valid JSON string')
+        try:
+            username = event['requestContext']['authorizer']['jwt']['claims']['username']
+            logger.debug(f'Request from user: {username}')
+        except KeyError:
+            username = None
+            logger.debug('Creating anonymous link')
 
         try:
             link = ShortenedLink(
                 id=shortid.generate(),
-                url=body['url']
+                url=body['url'],
+                user=username
             )
             link.save()
         except KeyError as e:

@@ -40,6 +40,13 @@ provider:
   region: eu-west-1
   httpApi:
     cors: true
+    authorizers:
+      baseJwtAuthorizer:
+        type: jwt
+        identitySource: $request.header.Authorization
+        issuerUrl: https://cognito-idp.${self:provider.region}.amazonaws.com/${ssm:/shortrLink/${sls:stage}/user_pool_id}
+        audience:
+          - '${ssm:/shortrLink/${sls:stage}/user_pool_web_cllient_id}'
   tracing:
     apiGateway: true
     lambda: true
@@ -85,6 +92,20 @@ functions:
     events:
       - httpApi:
           method: POST
+          path: '/short-links'
+  createShortenedLinkAnon:
+    handler: src/handlers/create_link.handler
+    events:
+      - httpApi:
+          method: POST
+          path: '/short-links/anonymous'
+  listShortenedLinks:
+    handler: src/handlers/list_links.handler
+    events:
+      - httpApi:
+          authorizer:
+            name: baseJwtAuthorizer
+          method: GET
           path: '/short-links'
   indexRedirectDynamoDb:
     handler: src/handlers/index_redirect_dynamodb.handler
