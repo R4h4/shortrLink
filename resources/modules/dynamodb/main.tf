@@ -15,12 +15,27 @@ resource "aws_dynamodb_table" "main_table" {
   stream_enabled = var.stream_enabled
   stream_view_type = "KEYS_ONLY"
 
+  global_secondary_index {
+    name               = "UserCreatedAtIndex"
+    hash_key           = "user"
+    range_key          = "createdAt"
+    projection_type    = "ALL"
+  }
+
   attribute {
     name = "PK"
     type = "S"
   }
   attribute {
     name = "SK"
+    type = "S"
+  }
+  attribute {
+    name = "user"
+    type = "S"
+  }
+  attribute {
+    name = "createdAt"
     type = "S"
   }
 }

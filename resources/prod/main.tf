@@ -157,6 +157,18 @@ module "cognito_user_pool" {
   ]
 }
 
+resource "aws_ssm_parameter" "user_pool_id" {
+  name = "/${local.app}/${local.stage}/user_pool_id"
+  type = "String"
+  value = module.cognito_user_pool.user_pool.id
+}
+
+resource "aws_ssm_parameter" "user_client_id_web" {
+  name = "/${local.app}/${local.stage}/user_pool_web_cllient_id"
+  type = "String"
+  value = module.cognito_user_pool.clients["web-app-client"].id
+}
+
 resource "aws_ssm_parameter" "website_bucket_name" {
   name = format("/%s/%s/app_bucket_name", local.app, local.stage)
   type = "String"
