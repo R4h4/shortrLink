@@ -1,4 +1,6 @@
-import axios from 'axios';
+import httpAxios from '@/utils/http-axios'
+import store from '@/store'
+import { appConfig } from '@/config/app'
 import { isValidHttpUrl, copyTextToClipboard } from './utils'
 
 export default {
@@ -17,14 +19,17 @@ export default {
     async shortenOrCopyLink() {
       if (this.buttonText == 'Shorten') {
         if (isValidHttpUrl(this.inputUrl)) {
-          const response = await axios.post(
-          'https://api-dev.shortrlink.com/short-links',
+          let api_endpoint = (
+            store.getters['auth/isAuthenticated'] 
+            ? appConfig.BACKEND_URL + '/short-links' 
+            : api_endpoint = appConfig.BACKEND_URL + '/short-links/anonymous')
+          const response = await httpAxios.post(
+            api_endpoint,
             {
               url: this.inputUrl
             }
           )
           const results = response.data
-          console.log(results)
           this.buttonText = 'Copy'
           this.inputUrl = results.shortUrl
         } else {

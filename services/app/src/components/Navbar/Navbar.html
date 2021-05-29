@@ -1,0 +1,54 @@
+<nav
+class="navbar navbar-expand-lg navbar-light bg-white z-index-3 py-3 shadow-none navbar-transparent">
+  <div class="container">
+    <a class="navbar-brand" href="./" rel="tooltip" title="Shorter links for everyone" data-placement="bottom">
+      <img src="@/assets/images/shortrLink_logo.png" style="height: 3rem; margin-top: -1rem;" />
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navigation" aria-controls="navigation" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navigation">
+      <div v-if="isAuthenticated">
+        <ul class="navbar-nav navbar-nav-hover ms-auto">
+          <div class="row justify-content-end">
+            <div class="col-auto m-auto">
+              <a class="nav-link text-secondary" href="https://github.com/R4h4/shortrLink" target="_blank">
+                GitHub
+              </a>
+            </div>
+            <div class="col-auto m-auto">
+              <a class="nav-item nav-link text-secondary" href="./sign-out">
+                Logout
+              </a>
+            </div>
+          </div>
+        </ul>
+      </div>
+      <div v-else>
+        <ul class="navbar-nav navbar-nav-hover ms-auto">
+          <div class="row justify-content-end">
+            <div class="col-auto m-auto">
+              <a class="nav-link text-secondary" href="https://github.com/R4h4/shortrLink" target="_blank">
+                GitHub
+              </a>
+            </div>
+            <div class="col-auto m-auto">
+              <a class="nav-link text-secondary" href="./login">
+                Login
+              </a>
+            </div>
+            <div class="col-auto">
+              <div class="bg-white border-radius-lg d-flex me-2">
+                <a href="./sign-up">
+                  <button class="btn  btn-white text-primary mb-0">Register</button>
+                </a>
+              </div>
+            </div>
+          </div>
+        </ul>
+      </div>
+    </div>
+  </div>
+</nav>
+<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet" />

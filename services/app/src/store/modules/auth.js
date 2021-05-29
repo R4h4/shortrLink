@@ -34,10 +34,10 @@ const mutations = {
   clearAuthenticationStatus: state => {
     state.authenticationStatus = null;
   },
-  setUserAuthenticated(state, user, accessToken) {
-    state.user = user;
+  setUserAuthenticated(state, data) {
+    state.user = data.userData.Username;
     state.isAuthenticated = true;
-    state.accessToken = accessToken
+    state.accessToken = data.accessToken
   },
   clearAuthentication(state) {
     state.user = null;

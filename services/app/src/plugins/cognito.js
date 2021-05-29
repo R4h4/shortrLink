@@ -84,9 +84,10 @@ CognitoAuth.prototype.authenticate  = function(username, pass, cb) {
 
   cognitoUser.authenticateUser(authenticationDetails, {
       onSuccess: function (result) {
-          console.log('access token + ' + result.getAccessToken().getJwtToken())
+          let accessToken = result.getAccessToken().getJwtToken()
+          console.log('access token + ' + accessToken)
           var logins = {}
-          logins['cognito-idp.' + Config.region + '.amazonaws.com/' + Config.UserPoolId] = result.getIdToken().getJwtToken()
+          logins['cognito-idp.' + Config.region + '.amazonaws.com/' + Config.UserPoolId] = accessToken
           console.log(logins)
 
           Config.credentials = new CognitoIdentityCredentials({
@@ -94,7 +95,10 @@ CognitoAuth.prototype.authenticate  = function(username, pass, cb) {
               Logins: logins
           })
           console.log(Config.credentials)
-          store.commit("auth/setUserAuthenticated", username, result.getAccessToken().getJwtToken())
+          store.commit("auth/setUserAuthenticated", {
+            accessToken: accessToken,
+            userData: userData
+          })
           // this.onChange(true)
           cb(null, result)
       },

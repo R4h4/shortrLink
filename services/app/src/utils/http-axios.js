@@ -10,8 +10,11 @@ const service = axios.create({
 })
 
 // Token
-if (store.getters.getLoggedUser) {
-    service.defaults.headers.common['Authorization'] = 'Bearer ' + store.getters.getLoggedUser.access_token
+if (store.getters['auth/isAuthenticated']) {
+    console.log('Is authenticated, adding auth header')
+    service.defaults.headers.common['Authorization'] = 'Bearer ' + store.getters['auth/getAccessToken']
+} else {
+    console.log('User not authenticated')
 }
 
 // Request Interceptor
