@@ -42,7 +42,7 @@ service.interceptors.response.use(response => {
         // Session Expired
         if (401 === error.response.status) {
             errors = error.response.data.message
-            store.dispatch('logOut')
+            store.mutations['auth/clearAuthentication']
         }
 
         // Errors from backend

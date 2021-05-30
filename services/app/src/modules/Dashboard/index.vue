@@ -3,11 +3,11 @@
     <div class="row mt-4">
       <div class="col-4">
       <div v-for="item in links" :key="item.id">
-        <linkCard :link=item />
+        <linkCard :link="item" />
       </div>
       </div>
       <div class="col-8">
-        <linkClicksCard />
+        <linkClicksCard v-if="Object.keys(selectedLink).length" :link="selectedLink" />
       </div>
     </div>
   </dashboardLayout>
@@ -22,7 +22,6 @@ import * as bootstrap from  "../../assets/js/core/bootstrap.min.js"
 // <script src="../assets/js/soft-ui-dashboard.min.js">
 import dashboardLayout from '@/layouts/Dashboard'
 import httpAxios from '@/utils/http-axios'
-// import store from '@/store'
 import linkCard from './components/LinkCard'
 import linkClicksCard from './components/LinkClicksCard'
 
@@ -30,7 +29,8 @@ export default {
   name: 'Dashboard',
   data() {
       return {
-        links: null
+        links: null,
+        selectedLink: {},
       }
   },
   created() {
@@ -38,7 +38,7 @@ export default {
   },
   watch: {
     // call again the method if the route changes
-    '$route': 'fetchData'
+    '$route': 'selectLink'
   },
   components: {
     dashboardLayout,
@@ -52,7 +52,18 @@ export default {
     async fetchData() {
       const res = await httpAxios.get('/short-links')
       this.links = res.data.links;
-      console.log(this.links)
+      this.selectLink()
+    },
+    async selectLink() {
+      if (!!this.$route.query && !!this.links) {
+        var i
+        for ( i=0; i<this.links.length; i++ ) {
+          if (this.links[i].id == this.$route.query.id) {
+            this.selectedLink = this.links[i];
+          }
+          console.log(this.selectedLink.url)
+        }
+      }
     }
   },
 }

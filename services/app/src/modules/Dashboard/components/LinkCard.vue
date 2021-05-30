@@ -1,5 +1,5 @@
 <template>
-  <div class="card move-on-hover mb-3">
+  <div @click="setSelected()" class="card move-on-hover mb-3">
     <div class="card-body p-3">
       <div class="row">
           <div class="links">
@@ -42,6 +42,11 @@ export default {
     this.days_ago = Math.trunc( Difference_In_Time / (1000 * 3600 * 24) * -1 )
     console.log(this.days_ago)
     // var Difference_In_Days = Difference_In_Time / (1000 * 3600 * 24);
+  },
+  methods: {
+    setSelected() {
+      this.$router.push({ query: { id: this.link.id }})
+    }
   },
 }
 </script>
