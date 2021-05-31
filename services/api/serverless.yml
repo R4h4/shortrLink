@@ -117,6 +117,14 @@ functions:
             name: baseJwtAuthorizer
           method: GET
           path: '/short-links'
+  getShortenedLinkStats:
+    handler: src/handlers/get_link_stats.handler
+    events:
+      - httpApi:
+          authorizer:
+            name: baseJwtAuthorizer
+          method: GET
+          path: '/short-links/{link_id}/stats'
   indexRedirectDynamoDb:
     handler: src/handlers/index_redirect_dynamodb.handler
     events:

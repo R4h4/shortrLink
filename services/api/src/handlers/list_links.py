@@ -2,9 +2,12 @@ import json
 import os
 import logging
 
+from aws_xray_sdk.core import xray_recorder
+from aws_xray_sdk.core import patch_all
+
 from src.models import ShortenedLink
 
-
+patch_all()
 logger = logging.getLogger(__name__)
 if os.environ['STAGE'] == 'dev':
     logger.setLevel(logging.DEBUG)
@@ -32,7 +35,8 @@ def handler(event, context):
                     'clicks': link.clicks,
                     'title': link.title,
                     'createdAt': str(link.createdAt),
-                    'url': link.url
+                    'url': link.url,
+                    'short_link': link.short_link
                 } for link in links
             ],
             'lastToken': links.last_evaluated_key,
