@@ -1,13 +1,10 @@
 import os
-import json
 import logging
-import datetime as dt
 
 from aws_xray_sdk.core import xray_recorder
 from aws_xray_sdk.core import patch_all
 
 from src.models import ShortenedLink
-
 
 # apply the XRay handler to all clients.
 patch_all()
