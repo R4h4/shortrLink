@@ -1,2 +1,3 @@
 services/app/src/assets/* linguist-vendored
-services/app/src/layouts/Main/Main.css linguist-vendored
+services/app/src/layouts/Main/Main.css
+ services/app/src/layouts/Main/* linguist-vendored
