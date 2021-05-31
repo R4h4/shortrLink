@@ -61,7 +61,6 @@ export default {
           if (this.links[i].id == this.$route.query.id) {
             this.selectedLink = this.links[i];
           }
-          console.log(this.selectedLink.url)
         }
       }
     }

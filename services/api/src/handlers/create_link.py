@@ -44,6 +44,9 @@ def handler(event, context):
             username = None
             logger.debug('Creating anonymous link')
 
+        if not body['url'].startswith('http'):
+            body['url'] = 'https://' + body['url']
+
         try:
             link = ShortenedLink(
                 id=shortid.generate(),

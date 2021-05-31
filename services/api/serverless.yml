@@ -19,6 +19,8 @@ custom:
   prune:
     automatic: true
     number: 5
+  pythonRequirements:
+    dockerizePip: true  # Because of lxml
   customDomain:
     domainName: '${self:custom.domainName.${sls:stage}}'
     certificateName: '*.shortrlink.com'
@@ -117,6 +119,25 @@ functions:
             name: baseJwtAuthorizer
           method: GET
           path: '/short-links'
+  getShortenedLinkStats:
+    handler: src/handlers/get_link_stats.handler
+    events:
+      - httpApi:
+          authorizer:
+            name: baseJwtAuthorizer
+          method: GET
+          path: '/short-links/{link_id}/stats'
+  addLinkInformation:
+    handler: src/handlers/add_link_information.handler
+    events:
+      - eventBridge:
+          eventBus: 'arn:aws:events:${self:provider.region}:*:event-bus/${ssm:/shortrLink/${sls:stage}/eventbus_name}'
+          maximumRetryAttempts: 1
+          pattern:
+            source:
+              - 'shortrLinks.lambda'
+            detail-type:
+              - 'shortrLink link created'
   indexRedirectDynamoDb:
     handler: src/handlers/index_redirect_dynamodb.handler
     events:

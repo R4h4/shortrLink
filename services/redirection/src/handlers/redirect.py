@@ -54,7 +54,9 @@ def handler(event, context):
                             'ip': event['requestContext']['http']['sourceIp'],
                             'user_agent': event['requestContext']['http']['userAgent'],
                             'origin': event['headers'].get('Origin', ''),
-                            'headers': event['headers']
+                            'headers': event['headers'],
+                            # Owner of the link
+                            'user': link.user
                         }),
                         'EventBusName': os.environ['EVENT_BUS_NAME']
                     },

@@ -1,3 +1,6 @@
 pynamodb
 shortid
 aws-xray-sdk
+mypy-boto3-timestream-query
+requests
+lxml

@@ -1,6 +1,7 @@
 // Import
 import axios from 'axios'
 import store from '@/store'
+import router from '@/router'
 import { appConfig } from '@/config/app'
 import { showNotification } from '@/utils/show-notification'
 
@@ -42,7 +43,8 @@ service.interceptors.response.use(response => {
         // Session Expired
         if (401 === error.response.status) {
             errors = error.response.data.message
-            store.mutations['auth/clearAuthentication']
+            store.commit('auth/clearAuthentication')
+            router.push({ name: "dashboard" })
         }
 
         // Errors from backend

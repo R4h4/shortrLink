@@ -2,7 +2,7 @@ import os
 from datetime import datetime
 
 from pynamodb.indexes import GlobalSecondaryIndex, AllProjection
-from pynamodb.attributes import UnicodeAttribute, UTCDateTimeAttribute, NumberAttribute
+from pynamodb.attributes import UnicodeAttribute, UTCDateTimeAttribute, NumberAttribute, BooleanAttribute
 from pynamodb.models import Model
 
 
@@ -43,6 +43,9 @@ class ShortenedLink(Model):
     url = UnicodeAttribute(null=False)
     user = UnicodeAttribute(null=True)
     title = UnicodeAttribute(null=True)
+    short_link = UnicodeAttribute(null=True)
+    is_valid = BooleanAttribute(null=False, default_for_new=True)
+    invalid_message = UnicodeAttribute(null=True)
 
     clicks = NumberAttribute(null=False, default_for_new=0)
 
@@ -53,6 +56,7 @@ class ShortenedLink(Model):
         self.updatedAt = datetime.now()
         self.PK = self.id
         self.SK = 'LINK'
+        self.short_link = self.short_link if self.short_link else f'shortr.link/{self.id}'
         super(ShortenedLink, self).save()
 
     def __iter__(self):
