@@ -75,7 +75,6 @@ module "cognito_user_pool" {
 
   alias_attributes = [
     "email",
-    "phone_number",
     "preferred_username",
   ]
 
@@ -87,10 +86,6 @@ module "cognito_user_pool" {
     {
       name = "verified_email"
       priority = 1
-    },
-    {
-      name = "verified_phone_number"
-      priority = 2
     }
   ]
 
@@ -152,7 +147,7 @@ module "cognito_user_pool" {
       callback_urls = [
         "https://shortrlink.com/dashboard"]
       default_redirect_uri = "https://shortrlink.com/dashboard"
-      generate_secret = true
+      generate_secret = false
     }
   ]
 }

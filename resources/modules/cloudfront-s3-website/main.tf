@@ -53,11 +53,11 @@ resource "aws_s3_bucket" "website_logs" {
 
 resource "aws_s3_bucket" "website_root" {
   bucket = var.domain_name
-  acl    = "private"
+  acl    = "public-read"
   versioning {
     enabled = true
   }
-    logging {
+  logging {
     target_bucket = aws_s3_bucket.website_logs.bucket
     target_prefix = "${var.domain_name}/"
   }
@@ -65,6 +65,15 @@ resource "aws_s3_bucket" "website_root" {
     index_document = "index.html"
     error_document = "404.html"
   }
+
+  cors_rule {
+    allowed_headers = var.cors_allowed_headers
+    allowed_methods = var.cors_allowed_methods
+    allowed_origins = var.cors_allowed_origins
+    expose_headers  = var.cors_expose_headers
+    max_age_seconds = var.cors_max_age_seconds
+  }
+
   policy = data.aws_iam_policy_document.s3_bucket_policy.json
   tags   = var.tags
 }
@@ -202,35 +211,15 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
     error_caching_min_ttl = 0
     response_page_path    = "/"
   }
+  custom_error_response {
+    error_code            = 404
+    response_code         = 200
+    error_caching_min_ttl = 0
+    response_page_path    = "/"
+  }
 
   wait_for_deployment = false
   tags                = var.tags
-}
-
-# Creates policy to allow public access to the S3 bucket
-resource "aws_s3_bucket_policy" "update_website_root_bucket_policy" {
-  bucket = aws_s3_bucket.website_root.id
-
-  policy = <<POLICY
-{
-  "Version": "2012-10-17",
-  "Id": "PolicyForWebsiteEndpointsPublicContent",
-  "Statement": [
-    {
-      "Sid": "PublicRead",
-      "Effect": "Allow",
-      "Principal": "*",
-      "Action": [
-        "s3:GetObject"
-      ],
-      "Resource": [
-        "${aws_s3_bucket.website_root.arn}/*",
-        "${aws_s3_bucket.website_root.arn}"
-      ]
-    }
-  ]
-}
-POLICY
 }
 
 # Creates the CloudFront distribution to serve the redirection website (if redirection is required)
