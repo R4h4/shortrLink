@@ -40,3 +40,33 @@ variable "price_class" {
   default     = "PriceClass_100" // Only US,Canada,Europe
   description = "CloudFront distribution price class"
 }
+
+variable "cors_allowed_headers" {
+  type        = list(string)
+  default     = ["*"]
+  description = "List of allowed headers"
+}
+
+variable "cors_allowed_methods" {
+  type        = list(string)
+  default     = ["GET"]
+  description = "List of allowed methods (e.g. GET, PUT, POST, DELETE, HEAD) "
+}
+
+variable "cors_allowed_origins" {
+  type        = list(string)
+  default     = ["*"]
+  description = "List of allowed origins (e.g. example.com, test.com)"
+}
+
+variable "cors_expose_headers" {
+  type        = list(string)
+  default     = ["ETag"]
+  description = "List of expose header in the response"
+}
+
+variable "cors_max_age_seconds" {
+  type        = number
+  default     = 3600
+  description = "Time in seconds that browser can cache the response"
+}
