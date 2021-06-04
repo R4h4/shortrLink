@@ -49,5 +49,3 @@ export default {
     }
 }
 </script>
-
-<style src='../Main/Main.css' />

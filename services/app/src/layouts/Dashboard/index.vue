@@ -16,8 +16,6 @@
 </template>
 
 <script>
-import 'bootstrap/dist/js/bootstrap.min.js'
-import '@fortawesome/fontawesome-free/css/all.min.css'
 import { appConfig } from '@/config/app.js'
 import Navbar from '@/components/Navbar'
 
@@ -36,5 +34,3 @@ export default {
     },
 }
 </script>
-
-<style src='../Main/Main.css' />
