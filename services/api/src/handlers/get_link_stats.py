@@ -71,7 +71,7 @@ def handler(event, context):
         SELECT 
             BIN(time, 1d) AS binned_timestamp, 
             count(measure_value::boolean) as clicks
-        FROM shortrLink_dev.redirects
+        FROM {os.environ['TIMESTREAM_DB']}.redirects
         WHERE 
             link_id = '{link_id}'
             and time > ago({days}d)
