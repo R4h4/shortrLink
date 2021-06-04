@@ -34,8 +34,8 @@ custom:
 provider:
   name: aws
   lambdaHashingVersion: '20201221'
-#  eventBridge:
-#    useCloudFormation: true
+  eventBridge:
+    useCloudFormation: true
   profile: privateGmail
   runtime: python3.8
   stage: ${opt:stage, 'dev'}
@@ -48,7 +48,7 @@ provider:
         identitySource: $request.header.Authorization
         issuerUrl: https://cognito-idp.${self:provider.region}.amazonaws.com/${ssm:/shortrLink/${sls:stage}/user_pool_id}
         audience:
-          - '${ssm:/shortrLink/${sls:stage}/user_pool_web_cllient_id}'
+          - '${ssm:/shortrLink/${sls:stage}/user_pool_web_client_id}'
   tracing:
     apiGateway: true
     lambda: true

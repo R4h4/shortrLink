@@ -1,4 +1,3 @@
-  
 <template>
   <loader-component v-if="displayLoader"/>
   <router-view/>

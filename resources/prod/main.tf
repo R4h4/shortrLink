@@ -72,6 +72,11 @@ module "cognito_user_pool" {
 
   enable_username_case_sensitivity = false
   advanced_security_mode = "ENFORCED"
+  password_minimum_length = 8
+  password_require_lowercase = false
+  password_require_symbols = false
+  password_require_numbers = false
+  password_require_uppercase = false
 
   alias_attributes = [
     "email",
@@ -159,7 +164,7 @@ resource "aws_ssm_parameter" "user_pool_id" {
 }
 
 resource "aws_ssm_parameter" "user_client_id_web" {
-  name = "/${local.app}/${local.stage}/user_pool_web_cllient_id"
+  name = "/${local.app}/${local.stage}/user_pool_web_client_id"
   type = "String"
   value = module.cognito_user_pool.clients["web-app-client"].id
 }
