@@ -21,6 +21,8 @@ custom:
     number: 5
   pythonRequirements:
     dockerizePip: true  # Because of lxml
+    useDownloadCache: false
+    useStaticCache: false
   customDomain:
     domainName: '${self:custom.domainName.${sls:stage}}'
     certificateName: '*.shortrlink.com'

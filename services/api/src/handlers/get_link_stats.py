@@ -44,9 +44,12 @@ def create_time_series(recordset: QueryResponseTypeDef, days: int):
     step = dt.timedelta(days=1)
 
     time_series = []
+    n_rows = len(recordset['Rows'])
     i = 0  # Iterrator through the timestream record set (ordered by the bin)
     while start < end:
-        if recordset['Rows'][i]['Data'][0]['ScalarValue'] == start.strftime('%Y-%m-%d 00:00:00.000000000'):
+        if i == n_rows:
+            time_series.append(0)
+        elif (data := recordset['Rows'][i]['Data']) and data[0]['ScalarValue'] == start.strftime('%Y-%m-%d 00:00:00.000000000'):
             time_series.append(int(recordset['Rows'][i]['Data'][1]['ScalarValue']))
             i += 1
         else:
