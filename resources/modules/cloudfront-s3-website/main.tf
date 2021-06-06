@@ -189,21 +189,6 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
     acm_certificate_arn = data.aws_acm_certificate.acm_cert.arn
     ssl_support_method  = "sni-only"
   }
-//  dynamic "viewer_certificate" {
-//    for_each = local.default_certs
-//    content {
-//      cloudfront_default_certificate = true
-//    }
-//  }
-//
-//  dynamic "viewer_certificate" {
-//    for_each = local.acm_certs
-//    content {
-//      acm_certificate_arn      = data.aws_acm_certificate.acm_cert[0].arn
-//      ssl_support_method       = "sni-only"
-//      minimum_protocol_version = "TLSv1"
-//    }
-//  }
 
   custom_error_response {
     error_code            = 403
