@@ -13,7 +13,7 @@ resource "aws_dynamodb_table" "main_table" {
   write_capacity = local.write_capacity
 
   stream_enabled = var.stream_enabled
-  stream_view_type = "KEYS_ONLY"
+  stream_view_type = "NEW_AND_OLD_IMAGES"
 
   global_secondary_index {
     name               = "UserCreatedAtIndex"
@@ -37,6 +37,14 @@ resource "aws_dynamodb_table" "main_table" {
   attribute {
     name = "createdAt"
     type = "S"
+  }
+
+  replica {
+    region_name = "ap-southeast-1"
+  }
+
+  replica {
+    region_name = "us-east-1"
   }
 }
 

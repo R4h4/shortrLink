@@ -35,6 +35,7 @@ provider "aws" {
 module "dynamodb_table" {
   source   = "../modules/dynamodb"
 
+  stream_enabled = true
   app_name = local.app
   stage = local.stage
 }
