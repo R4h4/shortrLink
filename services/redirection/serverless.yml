@@ -9,6 +9,7 @@ plugins:
   - serverless-prune-plugin
   - serverless-python-requirements
   - serverless-domain-manager
+  - serverless-plugin-lambda-insights
 
 package:
   patterns:
@@ -22,7 +23,7 @@ custom:
   customDomain:
     domainName: '${self:custom.domainName.${sls:stage}}'
     certificateName: '*.shortr.link'
-    createRoute53Record: true
+    createRoute53Record: false
     endpointType: 'regional'
     apiType: 'http'
   domainName:
@@ -35,7 +36,7 @@ provider:
   profile: privateGmail
   runtime: python3.8
   stage: ${opt:stage, 'dev'}
-  region: eu-west-1
+  region: ${opt:region, 'eu-west-1'}
   httpApi:
     cors: true
   tracing:
@@ -57,16 +58,18 @@ provider:
             - "dynamodb:GetItem"
             - "dynamodb:DescribeTable"
           Resource:
-          - "${ssm:/shortrLink/${sls:stage}/dynamodb_table_arn}"
+            - "arn:aws:dynamodb:${aws:region}:${aws:accountId}:table/${ssm:/shortrLink/${sls:stage}/dynamodb_table_name}"
         - Effect: "Allow"
           Action:
             - "events:PutEvents"
           Resource:
-            - 'arn:aws:events:${self:provider.region}:*:event-bus/${ssm:/shortrLink/${sls:stage}/eventbus_name}'
+            - 'arn:aws:events:${self:provider.region}:${aws:accountId}:event-bus/${ssm:/shortrLink/${sls:stage}/eventbus_name}'
 
 functions:
   redirect:
     handler: src/handlers/redirect.handler
+    lambdaInsights: true
+    memorySize: 1024
     events:
       - httpApi:
           method: GET

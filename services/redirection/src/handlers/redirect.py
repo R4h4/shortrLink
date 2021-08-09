@@ -29,6 +29,7 @@ def handler(event, context):
     logger.debug(f'Processing event: {event}')
     try:
         link_id = event['pathParameters']['linkId']
+        logger.info('Redirecting user to main page')
         if not link_id:
             return {
                 'statusCode': 302,
@@ -37,7 +38,7 @@ def handler(event, context):
                 }
             }
         link = ShortenedLink.get(link_id, 'LINK')
-
+        logger.info(f'Redirecting user to {link.url}')
         # Make known that someone actually used the service
         try:
             res = client.put_events(
