@@ -1,8 +1,3 @@
-locals {
-  stage = "prod"
-  app = "shortrLink"
-}
-
 terraform {
   required_providers {
     aws = {
@@ -19,18 +14,6 @@ terraform {
   }
 }
 
-provider "aws" {
-  region = "eu-west-1"
-  profile = "privateGmail"
-  default_tags {
-    tags = {
-      terraform = "true"
-      project = local.app,
-      service = "main"
-      stage = local.stage
-    }
-  }
-}
 
 module "dynamodb_table" {
   source   = "../modules/dynamodb"
@@ -45,10 +28,6 @@ module "timestreamdb" {
 
   app_name = local.app
   stage = local.stage
-}
-
-resource "aws_cloudwatch_event_bus" "main" {
-  name = format("%s_%s_bus", local.app, local.stage)
 }
 
 module "cloudfront_s3_website_with_domain" {
@@ -204,10 +183,4 @@ resource "aws_ssm_parameter" "dynamodb_stream_arn" {
   name = format("/%s/%s/dynamodb_stream_arn", local.app,local.stage)
   type = "String"
   value = module.dynamodb_table.stream_arn
-}
-
-resource "aws_ssm_parameter" "eventbus_name" {
-  name = format("/%s/%s/eventbus_name", local.app,local.stage)
-  type = "String"
-  value = aws_cloudwatch_event_bus.main.name
 }
