@@ -22,13 +22,16 @@ custom:
     number: 5
   customDomain:
     domainName: '${self:custom.domainName.${sls:stage}}'
-    certificateName: '*.shortr.link'
+    certificateName: '${self:custom.certificateName.${sls:stage}}'
     createRoute53Record: false
     endpointType: 'regional'
     apiType: 'http'
   domainName:
     prod: 'shortr.link'
     dev: 'dev.shortr.link'
+  certificateName:
+    dev: '*.shortr.link'
+    prod: 'shortr.link'
 
 provider:
   name: aws
