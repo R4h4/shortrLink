@@ -25,4 +25,4 @@ def handler(event, context):
     """
     logger.debug(f'Processing event: {event}')
     link = ShortenedLink.get(event['detail']['link_id'], 'LINK')
-    link.update(actions=[ShortenedLink.clicks.set(link.clicks + 1)])
+    link.update(actions=[ShortenedLink.clicks.set(ShortenedLink.clicks + 1)])
