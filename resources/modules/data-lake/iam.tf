@@ -20,7 +20,10 @@ data "aws_iam_policy_document" "put_firehose" {
     sid       = "KinesisFirehoseAccess"
     effect    = "Allow"
     actions   = ["firehose:PutRecord", "firehose:PutRecordBatch"]
-    resources = [aws_kinesis_firehose_delivery_stream.first.arn]
+    resources = [
+      aws_kinesis_firehose_delivery_stream.redirects.arn,
+      aws_kinesis_firehose_delivery_stream.link_events.arn
+    ]
   }
 }
 
@@ -65,7 +68,10 @@ data "aws_iam_policy_document" "put_s3_policy" {
       "s3:ListBucketMultipartUploads",
       "s3:PutObject"
     ]
-    resources = [aws_s3_bucket.raw_events.arn, "${aws_s3_bucket.raw_events.arn}/*"]
+    resources = [
+      aws_s3_bucket.raw_events.arn, "${aws_s3_bucket.raw_events.arn}/*",
+      aws_s3_bucket.prepared_events.arn, "${aws_s3_bucket.prepared_events.arn}/*"
+    ]
   }
   statement {
     effect  = "Allow"
@@ -75,7 +81,10 @@ data "aws_iam_policy_document" "put_s3_policy" {
       "kinesis:GetRecords",
       "kinesis:ListShards"
     ]
-    resources = [aws_kinesis_firehose_delivery_stream.first.arn]
+    resources = [
+      aws_kinesis_firehose_delivery_stream.redirects.arn,
+      aws_kinesis_firehose_delivery_stream.link_events.arn
+    ]
   }
   statement {
     effect  = "Allow"

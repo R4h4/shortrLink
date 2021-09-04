@@ -2,15 +2,25 @@ data "aws_lambda_function" "raw_redirect_transform" {
   function_name = "data-lake-transform-${var.stage}-transformRedirectEvents"
 }
 
-resource "aws_kinesis_firehose_delivery_stream" "first" {
+resource "aws_kinesis_firehose_delivery_stream" "redirects" {
   destination = "extended_s3"
-  name        = "${var.app_name}-raw-events-${var.stage}"
+  name        = "${var.app_name}-raw-redirect-events-${var.stage}"
 
   extended_s3_configuration {
     role_arn            = aws_iam_role.firehose_role.arn
-    bucket_arn          = aws_s3_bucket.raw_events.arn
+    bucket_arn          = aws_s3_bucket.prepared_events.arn
     prefix              = "redirects/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/hour=!{timestamp:HH}/"
-    error_output_prefix = "error-redirects/!{firehose:random-string}/!{firehose:error-output-type}/!{timestamp:yyyy/MM/dd}/"
+    error_output_prefix = "error-redirects/!{firehose:error-output-type}/!{timestamp:yyyy/MM/dd}/!{firehose:random-string}/"
+    s3_backup_mode      = "Enabled"
+    s3_backup_configuration {
+      role_arn            = aws_iam_role.firehose_role.arn
+      bucket_arn          = aws_s3_bucket.raw_events.arn
+      # Deactivated until https://github.com/hashicorp/terraform-provider-aws/pull/13416 is merged (adds support of error_output_prefix)
+//      prefix              = "redirects/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/hour=!{timestamp:HH}/"
+      buffer_size         = 15
+      buffer_interval     = 300
+      compression_format  = "GZIP"
+    }
 
     cloudwatch_logging_options {
       enabled         = true
@@ -34,6 +44,18 @@ resource "aws_kinesis_firehose_delivery_stream" "first" {
         }
       }
     }
+  }
+}
+
+resource "aws_kinesis_firehose_delivery_stream" "link_events" {
+  destination = "extended_s3"
+  name        = "${var.app_name}-raw-link-events-${var.stage}"
+
+  extended_s3_configuration {
+    role_arn            = aws_iam_role.firehose_role.arn
+    bucket_arn          = aws_s3_bucket.raw_events.arn
+    prefix              = "link-events/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/hour=!{timestamp:HH}/"
+    error_output_prefix = "error-link-events/!{firehose:error-output-type}/!{timestamp:yyyy/MM/dd}/!{firehose:random-string}/"
   }
 }
 
@@ -69,7 +91,7 @@ PATTERN
 
 resource "aws_cloudwatch_event_target" "link_action" {
   event_bus_name  = var.eventbus_name
-  arn             = aws_kinesis_firehose_delivery_stream.first.arn
+  arn             = aws_kinesis_firehose_delivery_stream.link_events.arn
   rule            = aws_cloudwatch_event_rule.user_links.name
   role_arn        = aws_iam_role.eventbridge.arn
 }
@@ -94,7 +116,7 @@ PATTERN
 
 resource "aws_cloudwatch_event_target" "link_click" {
   event_bus_name  = var.eventbus_name
-  arn             = aws_kinesis_firehose_delivery_stream.first.arn
+  arn             = aws_kinesis_firehose_delivery_stream.redirects.arn
   rule            = aws_cloudwatch_event_rule.link_clicks.name
   role_arn        = aws_iam_role.eventbridge.arn
 }
