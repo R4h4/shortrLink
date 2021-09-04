@@ -77,11 +77,18 @@ data "aws_iam_policy_document" "put_s3_policy" {
     ]
     resources = [aws_kinesis_firehose_delivery_stream.first.arn]
   }
-
   statement {
     effect  = "Allow"
     actions = ["logs:PutLogEvents"]
     resources = [aws_cloudwatch_log_stream.firehose_errors.arn]
+  }
+  statement {
+    effect  = "Allow"
+    actions = ["lambda:InvokeFunction", "lambda:GetFunctionConfiguration"]
+    resources = [
+      "${data.aws_lambda_function.raw_redirect_transform.arn}:*",
+      data.aws_lambda_function.raw_redirect_transform.arn
+    ]
   }
 }
 

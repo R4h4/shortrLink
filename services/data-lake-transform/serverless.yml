@@ -1,0 +1,36 @@
+org: karstene
+app: shortrlink
+service: data-lake-transform
+
+frameworkVersion: '2'
+variablesResolutionMode: 20210326
+
+plugins:
+  - serverless-prune-plugin
+package:
+  patterns:
+    - '!node_modules/**'
+    - '!tests/**'
+
+custom:
+  prune:
+    automatic: true
+    number: 5
+#  pythonRequirements:
+#    dockerizePip: true  # Because of lxml
+#    useDownloadCache: false
+#    useStaticCache: false
+
+provider:
+  name: aws
+  lambdaHashingVersion: '20201221'
+  profile: privateGmail
+  runtime: python3.8
+  stage: ${opt:stage, 'dev'}
+  region: eu-west-1
+  environment:
+    STAGE: '${sls:stage}'
+
+functions:
+  transformRedirectEvents:
+    handler: src/handlers/redirect_raw.handler
