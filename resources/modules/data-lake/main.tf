@@ -3,13 +3,14 @@ resource "aws_kinesis_firehose_delivery_stream" "first" {
   name        = "${var.app_name}-raw-events-${var.stage}"
 
   extended_s3_configuration {
-    role_arn   = aws_iam_role.firehose_role.arn
-    bucket_arn = aws_s3_bucket.raw_events.arn
-
+    role_arn            = aws_iam_role.firehose_role.arn
+    bucket_arn          = aws_s3_bucket.raw_events.arn
+    prefix              = "redirects/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/hour=!{timestamp:HH}/"
+    error_output_prefix = "error-redirects/!{firehose:random-string}/!{firehose:error-output-type}/!{timestamp:yyyy/MM/dd}/"
 
     cloudwatch_logging_options {
-      enabled = true
-      log_group_name = aws_cloudwatch_log_group.firehose_errors.name
+      enabled         = true
+      log_group_name  = aws_cloudwatch_log_group.firehose_errors.name
       log_stream_name = aws_cloudwatch_log_stream.firehose_errors.name
     }
   }
@@ -20,8 +21,8 @@ resource "aws_cloudwatch_log_group" "firehose_errors" {
 }
 
 resource "aws_cloudwatch_log_stream" "firehose_errors" {
-  log_group_name = aws_cloudwatch_log_group.firehose_errors.name
-  name = "${var.app_name}-error-log-stream-${var.stage}"
+  log_group_name  = aws_cloudwatch_log_group.firehose_errors.name
+  name            = "${var.app_name}-error-log-stream-${var.stage}"
 }
 
 resource "aws_cloudwatch_event_rule" "user_links" {
