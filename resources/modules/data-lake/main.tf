@@ -27,7 +27,6 @@ resource "aws_kinesis_firehose_delivery_stream" "redirects" {
       log_group_name  = aws_cloudwatch_log_group.firehose_errors.name
       log_stream_name = aws_cloudwatch_log_stream.firehose_errors.name
     }
-
     processing_configuration {
       enabled = "true"
 
@@ -43,6 +42,105 @@ resource "aws_kinesis_firehose_delivery_stream" "redirects" {
           parameter_value = 0
         }
       }
+    }
+    data_format_conversion_configuration {
+      input_format_configuration {
+        deserializer {
+          open_x_json_ser_de {}
+        }
+      }
+      output_format_configuration {
+        serializer {
+          parquet_ser_de {}
+        }
+      }
+      schema_configuration {
+        database_name = aws_glue_catalog_database.data_lake.name
+        table_name = aws_glue_catalog_table.redirects.name
+        role_arn = aws_iam_role.firehose_role.arn
+      }
+    }
+  }
+}
+
+resource "aws_glue_catalog_database" "data_lake" {
+  name = lower("${var.app_name}-${var.stage}-datalake")
+}
+
+resource "aws_glue_catalog_table" "redirects" {
+  database_name = aws_glue_catalog_database.data_lake.name
+  name = "redirects"
+
+  table_type = "EXTERNAL_TABLE"
+
+  parameters = {
+    EXTERNAL              = "TRUE"
+    "parquet.compression" = "SNAPPY"
+  }
+
+  storage_descriptor {
+    location = "${aws_s3_bucket.prepared_events.arn}/redirects"
+    input_format  = "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat"
+    output_format = "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat"
+    columns {
+      name = "version"
+      type = "string"
+    }
+    columns {
+      name = "id"
+      type = "string"
+    }
+    columns {
+      name = "detail-type"
+      type = "string"
+    }
+    columns {
+      name = "source"
+      type = "string"
+    }
+    columns {
+      name = "account"
+      type = "string"
+    }
+    columns {
+      name = "time"
+      type = "date"
+    }
+    columns {
+      name = "region"
+      type = "string"
+    }
+    columns {
+      name = "resources"
+      type = "string"
+    }
+    columns {
+      name = "link_id"
+      type = "string"
+    }
+    columns {
+      name = "ip"
+      type = "string"
+    }
+    columns {
+      name = "user_agent"
+      type = "string"
+    }
+    columns {
+      name = "origin"
+      type = "string"
+    }
+    columns {
+      name = "headers"
+      type = "struct"
+    }
+    columns {
+      name = "user"
+      type = "string"
+    }
+    columns {
+      name = "host"
+      type = "string"
     }
   }
 }

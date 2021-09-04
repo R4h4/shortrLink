@@ -99,6 +99,15 @@ data "aws_iam_policy_document" "put_s3_policy" {
       data.aws_lambda_function.raw_redirect_transform.arn
     ]
   }
+  statement {
+    effect  = "Allow"
+    actions = [
+      "glue:GetTable",
+      "glue:GetTableVersion",
+      "glue:GetTableVersions"
+    ]
+    resources = [aws_glue_catalog_table.redirects.arn]
+  }
 }
 
 resource "aws_iam_role_policy" "put_s3" {
