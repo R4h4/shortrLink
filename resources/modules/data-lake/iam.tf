@@ -99,6 +99,34 @@ data "aws_iam_policy_document" "put_s3_policy" {
       data.aws_lambda_function.raw_redirect_transform.arn
     ]
   }
+}
+
+resource "aws_iam_role_policy" "put_s3" {
+  policy = data.aws_iam_policy_document.put_s3_policy.json
+  role = aws_iam_role.firehose_role.id
+}
+
+resource "aws_iam_role" "firehose_glue_conversion" {
+  name = "${var.app_name}-firehose_glue_conversion-${var.stage}"
+
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": "sts:AssumeRole",
+      "Principal": {
+        "Service": "firehose.amazonaws.com"
+      },
+      "Effect": "Allow",
+      "Sid": ""
+    }
+  ]
+}
+EOF
+}
+
+data "aws_iam_policy_document" "data_lake_get_glue" {
   statement {
     effect  = "Allow"
     actions = [
@@ -106,11 +134,11 @@ data "aws_iam_policy_document" "put_s3_policy" {
       "glue:GetTableVersion",
       "glue:GetTableVersions"
     ]
-    resources = [aws_glue_catalog_table.redirects.arn]
+    resources = ["*"]
   }
 }
 
-resource "aws_iam_role_policy" "put_s3" {
-  policy = data.aws_iam_policy_document.put_s3_policy.json
-  role = aws_iam_role.firehose_role.id
+resource "aws_iam_role_policy" "access_glue_table_for_firehose" {
+  policy = data.aws_iam_policy_document.data_lake_get_glue.json
+  role = aws_iam_role.firehose_glue_conversion.id
 }

@@ -9,9 +9,12 @@ resource "aws_kinesis_firehose_delivery_stream" "redirects" {
   extended_s3_configuration {
     role_arn            = aws_iam_role.firehose_role.arn
     bucket_arn          = aws_s3_bucket.prepared_events.arn
-    prefix              = "redirects/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/hour=!{timestamp:HH}/"
+    prefix              = "redirects/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/"
     error_output_prefix = "error-redirects/!{firehose:error-output-type}/!{timestamp:yyyy/MM/dd}/!{firehose:random-string}/"
     s3_backup_mode      = "Enabled"
+    buffer_size         = 64
+    buffer_interval     = 300
+
     s3_backup_configuration {
       role_arn            = aws_iam_role.firehose_role.arn
       bucket_arn          = aws_s3_bucket.raw_events.arn
@@ -51,98 +54,20 @@ resource "aws_kinesis_firehose_delivery_stream" "redirects" {
       }
       output_format_configuration {
         serializer {
-          parquet_ser_de {}
+          parquet_ser_de {
+            compression = "SNAPPY"
+//            writer_version = "V2"
+          }
         }
       }
       schema_configuration {
-        database_name = aws_glue_catalog_database.data_lake.name
+        database_name = aws_glue_catalog_database.data_lake_prepared.name
         table_name = aws_glue_catalog_table.redirects.name
-        role_arn = aws_iam_role.firehose_role.arn
+        role_arn = aws_iam_role.firehose_glue_conversion.arn
       }
     }
   }
-}
-
-resource "aws_glue_catalog_database" "data_lake" {
-  name = lower("${var.app_name}-${var.stage}-datalake")
-}
-
-resource "aws_glue_catalog_table" "redirects" {
-  database_name = aws_glue_catalog_database.data_lake.name
-  name = "redirects"
-
-  table_type = "EXTERNAL_TABLE"
-
-  parameters = {
-    EXTERNAL              = "TRUE"
-    "parquet.compression" = "SNAPPY"
-  }
-
-  storage_descriptor {
-    location = "${aws_s3_bucket.prepared_events.arn}/redirects"
-    input_format  = "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat"
-    output_format = "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat"
-    columns {
-      name = "version"
-      type = "string"
-    }
-    columns {
-      name = "id"
-      type = "string"
-    }
-    columns {
-      name = "detail-type"
-      type = "string"
-    }
-    columns {
-      name = "source"
-      type = "string"
-    }
-    columns {
-      name = "account"
-      type = "string"
-    }
-    columns {
-      name = "time"
-      type = "date"
-    }
-    columns {
-      name = "region"
-      type = "string"
-    }
-    columns {
-      name = "resources"
-      type = "string"
-    }
-    columns {
-      name = "link_id"
-      type = "string"
-    }
-    columns {
-      name = "ip"
-      type = "string"
-    }
-    columns {
-      name = "user_agent"
-      type = "string"
-    }
-    columns {
-      name = "origin"
-      type = "string"
-    }
-    columns {
-      name = "headers"
-      type = "struct"
-    }
-    columns {
-      name = "user"
-      type = "string"
-    }
-    columns {
-      name = "host"
-      type = "string"
-    }
-  }
+  depends_on = [aws_iam_role_policy.access_glue_table_for_firehose]
 }
 
 resource "aws_kinesis_firehose_delivery_stream" "link_events" {
@@ -152,8 +77,8 @@ resource "aws_kinesis_firehose_delivery_stream" "link_events" {
   extended_s3_configuration {
     role_arn            = aws_iam_role.firehose_role.arn
     bucket_arn          = aws_s3_bucket.raw_events.arn
-    prefix              = "link-events/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/hour=!{timestamp:HH}/"
-    error_output_prefix = "error-link-events/!{firehose:error-output-type}/!{timestamp:yyyy/MM/dd}/!{firehose:random-string}/"
+    prefix              = "link-events/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/"
+    error_output_prefix = "error-link-events/!{firehose:error-output-type}/!{timestamp:yyyy/MM/dd}/"
   }
 }
 
