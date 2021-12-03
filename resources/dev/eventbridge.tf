@@ -4,8 +4,8 @@ resource "aws_cloudwatch_event_bus" "main" {
 
 data "aws_iam_policy_document" "aws_cloudwatch_event_bus_policy" {
   statement {
-    effect  = "Allow"
-    actions = ["events:PutEvents"]
+    effect    = "Allow"
+    actions   = ["events:PutEvents"]
     resources = [aws_cloudwatch_event_bus.main.arn]
   }
 }
@@ -29,24 +29,24 @@ resource "aws_iam_role" "eventbridge_events" {
 
 resource "aws_iam_role_policy" "publish_events_to_eventbridge" {
   policy = data.aws_iam_policy_document.aws_cloudwatch_event_bus_policy.json
-  role = aws_iam_role.eventbridge_events.id
+  role   = aws_iam_role.eventbridge_events.id
 }
 
 resource "aws_cloudwatch_event_bus" "ap_southeast_1" {
-  name = format("%s_%s_bus", local.app, local.stage)
+  name     = format("%s_%s_bus", local.app, local.stage)
   provider = aws.ap-southeast-1
 }
 
 resource "aws_cloudwatch_event_bus" "us_east_1" {
-  name = format("%s_%s_bus", local.app, local.stage)
+  name     = format("%s_%s_bus", local.app, local.stage)
   provider = aws.us-east-1
 }
 
 resource "aws_cloudwatch_event_rule" "duplicate_events_us_east_1_rule" {
-  name = "duplicate-events-for-cross-region"
-  description = "Duplicates all events from us-east-1 into the primary region"
+  name           = "duplicate-events-for-cross-region"
+  description    = "Duplicates all events from us-east-1 into the primary region"
   event_bus_name = aws_cloudwatch_event_bus.us_east_1.name
-  event_pattern = <<PATTERN
+  event_pattern  = <<PATTERN
     {
       "source": [{"prefix": "" }]
     }
@@ -56,19 +56,19 @@ resource "aws_cloudwatch_event_rule" "duplicate_events_us_east_1_rule" {
 }
 
 resource "aws_cloudwatch_event_target" "duplicate_events_us_east_1_target" {
-  arn = aws_cloudwatch_event_bus.main.arn
-  rule = aws_cloudwatch_event_rule.duplicate_events_us_east_1_rule.name
+  arn            = aws_cloudwatch_event_bus.main.arn
+  rule           = aws_cloudwatch_event_rule.duplicate_events_us_east_1_rule.name
   event_bus_name = aws_cloudwatch_event_bus.us_east_1.name
-  role_arn = aws_iam_role.eventbridge_events.arn
+  role_arn       = aws_iam_role.eventbridge_events.arn
 
   provider = aws.us-east-1
 }
 
 resource "aws_cloudwatch_event_rule" "duplicate_events_ap_southeast_1_rule" {
-  name = "duplicate-events-for-cross-region"
-  description = "Duplicates all events FROM ap-southeast-1 into the primary region"
+  name           = "duplicate-events-for-cross-region"
+  description    = "Duplicates all events FROM ap-southeast-1 into the primary region"
   event_bus_name = aws_cloudwatch_event_bus.ap_southeast_1.name
-  event_pattern = <<PATTERN
+  event_pattern  = <<PATTERN
     {
       "source": [{"prefix": "" }]
     }
@@ -78,30 +78,30 @@ resource "aws_cloudwatch_event_rule" "duplicate_events_ap_southeast_1_rule" {
 }
 
 resource "aws_cloudwatch_event_target" "duplicate_events_ap_southeast_1_target" {
-  arn = aws_cloudwatch_event_bus.main.arn
-  rule = aws_cloudwatch_event_rule.duplicate_events_ap_southeast_1_rule.name
+  arn            = aws_cloudwatch_event_bus.main.arn
+  rule           = aws_cloudwatch_event_rule.duplicate_events_ap_southeast_1_rule.name
   event_bus_name = aws_cloudwatch_event_bus.ap_southeast_1.name
-  role_arn = aws_iam_role.eventbridge_events.arn
+  role_arn       = aws_iam_role.eventbridge_events.arn
 
   provider = aws.ap-southeast-1
 }
 
 resource "aws_ssm_parameter" "eventbus_name" {
-  name = format("/%s/%s/eventbus_name", local.app,local.stage)
-  type = "String"
+  name  = format("/%s/%s/eventbus_name", local.app, local.stage)
+  type  = "String"
   value = aws_cloudwatch_event_bus.main.name
 }
 
 resource "aws_ssm_parameter" "eventbus_name_us_east_1" {
-  name = format("/%s/%s/eventbus_name", local.app,local.stage)
-  type = "String"
-  value = aws_cloudwatch_event_bus.main.name
+  name     = format("/%s/%s/eventbus_name", local.app, local.stage)
+  type     = "String"
+  value    = aws_cloudwatch_event_bus.main.name
   provider = aws.us-east-1
 }
 
 resource "aws_ssm_parameter" "eventbus_name_southeast_1" {
-  name = format("/%s/%s/eventbus_name", local.app,local.stage)
-  type = "String"
-  value = aws_cloudwatch_event_bus.main.name
+  name     = format("/%s/%s/eventbus_name", local.app, local.stage)
+  type     = "String"
+  value    = aws_cloudwatch_event_bus.main.name
   provider = aws.ap-southeast-1
 }

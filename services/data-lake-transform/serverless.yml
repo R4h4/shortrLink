@@ -34,3 +34,4 @@ provider:
 functions:
   transformRedirectEvents:
     handler: src/handlers/redirect_raw.handler
+    timeout: 60
